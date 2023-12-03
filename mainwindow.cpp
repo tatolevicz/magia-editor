@@ -93,14 +93,17 @@ void MainWindow::updateErrorMaker(int errorLine) {
 }
 
 int MainWindow::validateLuaScript(const std::string& script) {
-    try {
-        _lua->script(script);
-    } catch (const sol::error& e) {
-        std::string errorMsg = e.what();
-        int lineError = extractErrorLine(errorMsg);
-        return lineError;
+
+    sol::load_result resultado = _lua->load(script);
+    if (!resultado.valid()) {
+        sol::error err = resultado;
+        std::string mensagemErro = err.what();
+
+        // Extrair e retornar o número da linha do erro (implemente esta função)
+        return extractErrorLine(mensagemErro);
     }
-    return -1;
+
+    return -1; // Retorna -1 se a sintaxe estiver correta
 }
 
 int MainWindow::extractErrorLine(const std::string& erroMsg) {
