@@ -46,10 +46,13 @@ endif()
 
 
 add_subdirectory(external/scintilla)
+add_subdirectory(external/lua)
+add_subdirectory(external/sol2)
 
 target_include_directories(TestScintillaCmake PUBLIC
     external/lexilla/include
     external/lexilla/access
+    external/Lua/lua-5.4.6/include
 )
 
 # Adicione o caminho da biblioteca estática
@@ -62,6 +65,8 @@ target_link_libraries(TestScintillaCmake
     Qt${QT_VERSION_MAJOR}::Widgets
     scintilla-qt-edit
     lexilla
+    lua_static
+    sol2
 )
 
 set_target_properties(TestScintillaCmake PROPERTIES
