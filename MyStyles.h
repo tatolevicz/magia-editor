@@ -10,6 +10,7 @@ namespace mystyles {
     struct Colors {
         inline static int WHITE = 0xFFFFFF;
         inline static int GREY = 0x808080;
+        inline static int DARK_GREY = 0x404040;
         inline static int RED = 0x0000FF;
         inline static int GREEN = 0x00FF00;
         inline static int BLUE = 0xFF0000;
@@ -37,7 +38,35 @@ namespace mystyles {
         inline static void setDefaultStyle(ScintillaEdit* editor){
             editor->styleSetBack(STYLE_DEFAULT, 0x212121);
             editor->styleClearAll(); //this copies the defualt style to all the others
-            editor->setCaretFore(0xAAAAAA);
+
+            editor->setCaretFore(Colors::LIGHT_GREY);
+            editor->setCaretLineBack(Colors::DARK_GREY);  // Define a cor de fundo para o destaque
+
+            editor->styleSetBack(STYLE_LINENUMBER, Colors::DARK_GREY); // Cinza para fundo
+            editor->styleSetFore(STYLE_LINENUMBER, 0xFFFFFF); // Branco para texto
+//            editor->styleSetFont(STYLE_LINENUMBER, "Courier"); //todo::add font
+            editor->styleSetSize(STYLE_LINENUMBER, 10);
+
+
+//
+            editor->setMarginTypeN(0, SC_MARGIN_NUMBER);
+            editor->setMarginWidthN(0,25);
+            editor->setMarginMaskN(0, 0); // nao permite a renderizacao de marcadores na margem 1
+//            editor->setMarginTypeN(0, SC_MARGIN_SYMBOL);
+//            editor->setMarginWidthN(2,0);
+
+            editor->setMarginWidthN(1,30);
+            editor->setMarginTypeN(1, SC_MARGIN_COLOUR);
+            editor->setMarginMaskN(1, 1 << 1); // Permite o marcador 1 na margem 0
+
+//
+            int markerBreakpoint = 1; // Escolha um número de índice para o marcador de breakpoint
+            editor->markerDefine(markerBreakpoint, SC_MARK_CIRCLE);
+            editor->markerSetFore(markerBreakpoint, Colors::PINK); // Cor azul para o símbolo
+            editor->markerSetBack(markerBreakpoint, Colors::PINK); //
+
+//            editor->setMarginBackN(1, Colors::OLIVE); // Define a cor de fundo para a margem            editor->setMarginBackN(0, Colors::DARK_GREY); // Define a cor de fundo para a margem
+//            editor->setMarginBackN(1, Colors::OLIVE); // Define a cor de fundo para a margem
         }
    };
 
@@ -78,7 +107,7 @@ namespace mystyles {
            editor->styleSetFore(SCE_LUA_OPERATOR,  Colors::PINK);
            editor->styleSetBold(SCE_LUA_OPERATOR, true);
 
-           editor->styleSetFore(SCE_LUA_IDENTIFIER,  Colors::PURPLE);
+           editor->styleSetFore(SCE_LUA_IDENTIFIER,  Colors::WHITE);
            editor->styleSetBold(SCE_LUA_IDENTIFIER, true);
 
            editor->styleSetFore(SCE_LUA_STRINGEOL,Colors::LIME);

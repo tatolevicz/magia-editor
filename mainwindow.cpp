@@ -22,23 +22,54 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "Lexer available: " << name;
     }
 
-    auto editor = new ScintillaEdit(this);
+    _editor = new ScintillaEdit(this);
 
     auto lex = CreateLexer("lua");
     if(lex != nullptr)
         qDebug() << "Agora deu!!";
 
 
-    editor->resize(QSize(this->width(), this->height()));
-    editor->setWrapMode(SC_WRAP_WORD);
+    _editor->resize(QSize(this->width(), this->height()));
+    _editor->setWrapMode(SC_WRAP_WORD);
 
-    editor->setILexer((sptr_t)(void*)lex);
+    _editor->setILexer((sptr_t)(void*)lex);
 
 
-    mystyles::editor::setDefaultStyle(editor);
-    mystyles::lua::setDefaultStyle(editor);
+    mystyles::editor::setDefaultStyle(_editor);
+    mystyles::lua::setDefaultStyle(_editor);
+
+    _editor->autoCSetMaxWidth(50);
+    _editor->autoCSetMaxHeight(10);
+
+
+
+    // Conectar sinais e slots para eventos de digitação
+    connect(_editor, &ScintillaEdit::charAdded, this, &MainWindow::onCharAdded);
 
 }
+
+void MainWindow::onCharAdded(int ch) {
+    // Implementação de lógica de quando mostrar o autocomplete
+    if (ch == '(' || ch == ' ') {
+        _editor->markerAdd(0, 1);  // 10 é o número da linha, 0 é o índice do marcador
+
+        // Exemplo: mostrar autocomplete após '(' ou ' '
+        showAutocomplete();
+    }
+    else {
+        _editor->markerDelete(0, 1);
+    }
+}
+
+void MainWindow::showAutocomplete() {
+    // Exemplo de fonte de dados para autocomplete (palavras-chave Lua)
+    QStringList luaKeywords = {"function", "end", "if", "then", "else", "for", "while", "do", "repeat", "until"};
+    QString wordList = luaKeywords.join(" ");
+
+    // Exibir lista de autocomplete
+    _editor->autoCShow(0,wordList.toUtf8().data());
+}
+
 
 MainWindow::~MainWindow()
 {
