@@ -8,6 +8,7 @@
 #include "MyStyles.h"
 #include <sol/sol.hpp>
 #include <regex>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -47,30 +48,48 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Conectar sinais e slots para eventos de digitação
     connect(_editor, &ScintillaEdit::charAdded, this, &MainWindow::onCharAdded);
+    connect(_editor, &ScintillaEdit::modified, this, &MainWindow::scriptModified);
 
 
     //lua setup
     _lua = std::make_shared<sol::state>();
     _lua->open_libraries(sol::lib::base);
+
+    // syntax timer setup
+    _syntaxTimer = new QTimer(this);
+    _syntaxTimer->setInterval(1000); // 1000 ms = 1 segundo
+    connect(_syntaxTimer, &QTimer::timeout, this, &MainWindow::syntaxTimerTimeout);
+}
+
+void MainWindow::syntaxTimerTimeout() {
+    int length = _editor->textLength();
+    std::string script = _editor->getText(length).toStdString();
+    int errorLine = validateLuaScript(script);
+    updateErrorMaker(errorLine);
+}
+
+void MainWindow::scriptModified(Scintilla::ModificationFlags type,
+                    Scintilla::Position position,
+                    Scintilla::Position length,
+                    Scintilla::Position linesAdded,
+                    const QByteArray &text,
+                    Scintilla::Position line,
+                    Scintilla::FoldLevel foldNow,
+                    Scintilla::FoldLevel foldPrev)
+{
+    _syntaxTimer->start();
 }
 
 void MainWindow::onCharAdded(int ch) {
     // Implementação de lógica de quando mostrar o autocomplete
     if (ch == '(' || ch == ' ') {
 //        _editor->markerAdd(0, 1);  // 10 é o número da linha, 0 é o índice do marcador
-
         // Exemplo: mostrar autocomplete após '(' ou ' '
         showAutocomplete();
     }
     else {
 //        _editor->markerDelete(0, 1);
     }
-
-    int length = _editor->textLength();
-    std::string script = _editor->getText(length).toStdString();
-    qDebug() << "Char added: " << script;
-    int errorLine = validateLuaScript(script);
-    updateErrorMaker(errorLine);
 }
 
 void MainWindow::showAutocomplete() {
@@ -94,23 +113,19 @@ void MainWindow::updateErrorMaker(int errorLine) {
 
 int MainWindow::validateLuaScript(const std::string& script) {
 
-    sol::load_result resultado = _lua->load(script);
-    if (!resultado.valid()) {
-        sol::error err = resultado;
-        std::string mensagemErro = err.what();
+    sol::load_result result = _lua->load(script);
+    if (!result.valid()) {
+        sol::error err = result;
+        std::string errorMsg = err.what();
 
         // Extrair e retornar o número da linha do erro (implemente esta função)
-        return extractErrorLine(mensagemErro);
+        return extractErrorLine(errorMsg);
     }
 
     return -1; // Retorna -1 se a sintaxe estiver correta
 }
 
 int MainWindow::extractErrorLine(const std::string& erroMsg) {
-    // Implemente a lógica para extrair o número da linha do erro
-    // Isso pode variar dependendo do formato da mensagem de erro do Lua
-    // Por exemplo, você pode usar expressões regulares ou outras técnicas de análise de string
-//    qDebug() << "Error mgs: " << erroMsg;
 
     std::regex standard(R"(\]:([0-9]+):)"); // Padrão para capturar o número da linha
     std::smatch results;
