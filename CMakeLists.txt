@@ -47,9 +47,6 @@ endif()
 
 add_subdirectory(external/scintilla)
 
-#include(cmake/CPM.cmake)
-#CPMAddPackage("gh:elcuco/scintilla-code#cmake-support")
-
 target_include_directories(TestScintillaCmake PUBLIC
     external/lexilla/include
     external/lexilla/access
