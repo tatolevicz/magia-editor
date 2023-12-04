@@ -23,8 +23,7 @@ namespace mystyles {
     struct LuaEditorColors {
         inline static int PRE_PROC = 0xDDB26D; // Funções e métodos
         inline static int IDENTIFIER = 0xE7BEB4; // Identificadores
-        inline static int KEYWORD = 0x65BD91; // Palavras-chave (preto para destaque)
-        inline static int FOLDING_WORDS = 0xB46981; // Funções e métodos
+        inline static int KEYWORD = 0xB46981; // Palavras-chave (preto para destaque)
         inline static int COMMENT = 0x79554C; // Comentários
         inline static int DARK_BACKGROUND = 0x2C1E1B; // Cor de fundo do editor
         inline static int BACKGROUND = 0x3B2824; // Cor de fundo do editor
@@ -32,9 +31,9 @@ namespace mystyles {
         inline static int STRING = 0xCBB129; // Strings
         inline static int KNOWN_FUNCTION = 0x6193E9; // Funções e métodos
         inline static int ERRORS = 0x4B4BDB;
-        inline static int NUMBER = 0x68AFE0; // Números
+        inline static int NUMBER = 0x40BDBD; // Números
         inline static int OPEN_STRING = 0xE7BEB4; // Strings
-        inline static int OPERATOR = 0xE7BEB4; // Operadores
+        inline static int OPERATOR = 0xD98E6C; // Operadores
         inline static int CONSTANT = 0xAAB362; // Constantes (nil, true, false)
     };
 
@@ -133,50 +132,50 @@ namespace mystyles {
        inline static void setDefaultStyle(ScintillaEdit* editor){
 
            editor->styleSetFore(SCE_LUA_DEFAULT, LuaEditorColors::IDENTIFIER);
-           editor->styleSetBold(SCE_LUA_DEFAULT, true);
+           editor->styleSetBold(SCE_LUA_DEFAULT, false);
 
            editor->styleSetFore(SCE_LUA_COMMENT, LuaEditorColors::COMMENT);
-           editor->styleSetBold(SCE_LUA_COMMENT, true);
+           editor->styleSetBold(SCE_LUA_COMMENT, false);
 
            editor->styleSetFore(SCE_LUA_COMMENTLINE, LuaEditorColors::COMMENT);
-           editor->styleSetBold(SCE_LUA_COMMENTLINE, true);
+           editor->styleSetBold(SCE_LUA_COMMENTLINE, false);
 
            editor->styleSetFore(SCE_LUA_NUMBER, LuaEditorColors::NUMBER);
-           editor->styleSetBold(SCE_LUA_NUMBER, true);
+           editor->styleSetBold(SCE_LUA_NUMBER, false);
 
            editor->styleSetFore(SCE_LUA_WORD, LuaEditorColors::KEYWORD);
-           editor->styleSetBold(SCE_LUA_WORD, true);
+           editor->styleSetBold(SCE_LUA_WORD, false);
 
            editor->styleSetFore(SCE_LUA_STRING, LuaEditorColors::STRING);
-           editor->styleSetBold(SCE_LUA_STRING, true);
+           editor->styleSetBold(SCE_LUA_STRING, false);
 
            editor->styleSetFore(SCE_LUA_CHARACTER, LuaEditorColors::STRING);
-           editor->styleSetBold(SCE_LUA_CHARACTER, true);
+           editor->styleSetBold(SCE_LUA_CHARACTER, false);
 
            editor->styleSetFore(SCE_LUA_LITERALSTRING, LuaEditorColors::STRING);
-           editor->styleSetBold(SCE_LUA_LITERALSTRING, true);
+           editor->styleSetBold(SCE_LUA_LITERALSTRING, false);
 
            editor->styleSetFore(SCE_LUA_PREPROCESSOR, LuaEditorColors::PRE_PROC);
-           editor->styleSetBold(SCE_LUA_PREPROCESSOR, true);
+           editor->styleSetBold(SCE_LUA_PREPROCESSOR, false);
 
            editor->styleSetFore(SCE_LUA_OPERATOR,  LuaEditorColors::OPERATOR);
-           editor->styleSetBold(SCE_LUA_OPERATOR, true);
+           editor->styleSetBold(SCE_LUA_OPERATOR, false);
 
            editor->styleSetFore(SCE_LUA_IDENTIFIER, LuaEditorColors::IDENTIFIER);
            editor->styleSetBold(SCE_LUA_IDENTIFIER, false);
 
            editor->styleSetFore(SCE_LUA_STRINGEOL,LuaEditorColors::OPEN_STRING);
-           editor->styleSetBold(SCE_LUA_STRINGEOL, true);
+           editor->styleSetBold(SCE_LUA_STRINGEOL, false);
 
            editor->styleSetFore(SCE_LUA_WORD2, LuaEditorColors::KNOWN_FUNCTION);
-           editor->styleSetBold(SCE_LUA_WORD2, true);
+           editor->styleSetBold(SCE_LUA_WORD2, false);
 
            editor->styleSetFore(SCE_LUA_WORD3, LuaEditorColors::CONSTANT);
-           editor->styleSetBold(SCE_LUA_WORD3, true);
+           editor->styleSetBold(SCE_LUA_WORD3, false);
 
-//           editor->styleSetFore(SCE_LUA_WORD4, Colors::NAVY);
-//           editor->styleSetBold(SCE_LUA_WORD4, true);
-//
+           editor->styleSetFore(SCE_LUA_WORD4, LuaEditorColors::ERRORS);
+           editor->styleSetBold(SCE_LUA_WORD4, false);
+
 //           editor->styleSetFore(SCE_LUA_WORD5, Colors::MAROON);
 //           editor->styleSetBold(SCE_LUA_WORD5, true);
 //
@@ -189,11 +188,21 @@ namespace mystyles {
 //           editor->styleSetFore(SCE_LUA_WORD8, Colors::VIOLET);
 //           editor->styleSetBold(SCE_LUA_WORD8, true);
 //
-//           editor->styleSetFore(SCE_LUA_LABEL, Colors::LIGHT_GREY);
-//           editor->styleSetBold(SCE_LUA_LABEL, true);
+           editor->styleSetFore(SCE_LUA_LABEL, LuaEditorColors::PRE_PROC);
+           editor->styleSetBold(SCE_LUA_LABEL, false);
 
+           //SCE_LUA_WORD
+
+           editor->setKeyWords(0,"break do else elseif end for function goto if in local repeat return then until while");
+
+            //SCE_LUA_WORD2
            editor->setKeyWords(1,"print");//todo load here know functions
-           editor->setKeyWords(2,"and break false for in local nil not or repeat return true");
+
+           //SCE_LUA_WORD3
+           editor->setKeyWords(2,"false true and or not");
+
+           //SCE_LUA_WORD4
+           editor->setKeyWords(3,"nil");
        }
    };
 
