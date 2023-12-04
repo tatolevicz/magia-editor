@@ -26,6 +26,7 @@ private:
     void syntaxTimerTimeout();
     ScintillaEdit *_editor;
     void onCharAdded(int ch);
+    void onNewLine();
     void scriptModified(Scintilla::ModificationFlags type,
                         Scintilla::Position position,
                         Scintilla::Position length,

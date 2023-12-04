@@ -94,9 +94,20 @@ void MainWindow::onCharAdded(int ch) {
         // Exemplo: mostrar autocomplete após '(' ou ' '
         showAutocomplete();
     }
+    else if(ch == '\n'){
+        onNewLine();
+    }
     else {
 //        _editor->markerDelete(0, 1);
     }
+}
+
+void MainWindow::onNewLine() {
+    //TODO::just testsing -> this can work but need a lot of tests
+//    int currentLine = _editor->send(SCI_LINEFROMPOSITION, _editor->send(SCI_GETCURRENTPOS));
+//    int lineIndentation = 2;//_editor->send(SCI_GETLINEINDENTATION, currentLine);
+//    _editor->send(SCI_SETLINEINDENTATION, currentLine + 1, lineIndentation);
+//    _editor->send(SCI_GOTOPOS, _editor->send(SCI_POSITIONFROMLINE, currentLine + 1) + lineIndentation);
 }
 
 void MainWindow::showAutocomplete() {
