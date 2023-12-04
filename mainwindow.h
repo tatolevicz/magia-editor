@@ -35,6 +35,10 @@ private:
                         Scintilla::FoldLevel foldNow,
                         Scintilla::FoldLevel foldPrev);
 
+    void onMarginClicked(Scintilla::Position position,
+                           Scintilla::KeyMod modifiers,
+                           int margin);
+
     void showAutocomplete();
     void updateErrorMaker(int errorLine);
     int extractErrorLine(const std::string& error);

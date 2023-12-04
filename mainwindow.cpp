@@ -28,9 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     _editor = new ScintillaEdit(this);
 
     auto lex = CreateLexer("lua");
-    if(lex != nullptr)
-        qDebug() << "Agora deu!!";
 
+    assert(lex != nullptr);
 
     _editor->resize(QSize(this->width(), this->height()));
     _editor->setWrapMode(SC_WRAP_WORD);
@@ -44,12 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
     _editor->autoCSetMaxWidth(50);
     _editor->autoCSetMaxHeight(10);
 
-
-
     // Conectar sinais e slots para eventos de digitação
     connect(_editor, &ScintillaEdit::charAdded, this, &MainWindow::onCharAdded);
     connect(_editor, &ScintillaEdit::modified, this, &MainWindow::scriptModified);
-
+    connect(_editor, &ScintillaEdit::marginClicked, this, &MainWindow::onMarginClicked);
 
     //lua setup
     _lua = std::make_shared<sol::state>();
@@ -79,6 +76,16 @@ void MainWindow::scriptModified(Scintilla::ModificationFlags type,
 {
     _syntaxTimer->start();
 }
+void MainWindow::onMarginClicked(Scintilla::Position position,
+                     Scintilla::KeyMod modifiers,
+                     int margin){
+    // Obter a linha que foi clicada
+    int lineClicked = _editor->send(SCI_LINEFROMPOSITION, position, 0);
+    qDebug() << "Margin clicked on line " << lineClicked;
+    // Alternar dobradura na linha
+    _editor->send(SCI_TOGGLEFOLD, lineClicked);
+}
+
 
 void MainWindow::onCharAdded(int ch) {
     // Implementação de lógica de quando mostrar o autocomplete

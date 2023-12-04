@@ -48,6 +48,7 @@ endif()
 add_subdirectory(external/scintilla)
 add_subdirectory(external/lua)
 add_subdirectory(external/sol2)
+add_subdirectory(external/lexilla)
 
 target_include_directories(TestScintillaCmake PUBLIC
     external/lexilla/include
@@ -56,8 +57,8 @@ target_include_directories(TestScintillaCmake PUBLIC
 )
 
 # Adicione o caminho da biblioteca estática
-add_library(lexilla STATIC IMPORTED)
-set_target_properties(lexilla PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/external/lexilla/bin/liblexilla.a")
+#add_library(lexilla STATIC IMPORTED)
+#set_target_properties(lexilla PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/external/lexilla/bin/liblexzilla.a")
 
 
 target_link_libraries(TestScintillaCmake
