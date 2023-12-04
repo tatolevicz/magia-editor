@@ -4,11 +4,11 @@
 #include <SciLexer.h>
 #include <ILexer.h>
 #include <Lexilla.h>
-
 #include "MyStyles.h"
 #include <sol/sol.hpp>
 #include <regex>
 #include <QTimer>
+#include <QResizeEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_editor, &ScintillaEdit::modified, this, &MainWindow::scriptModified);
     connect(_editor, &ScintillaEdit::marginClicked, this, &MainWindow::onMarginClicked);
 
+
     //lua setup
     _lua = std::make_shared<sol::state>();
     _lua->open_libraries(sol::lib::base);
@@ -56,6 +57,20 @@ MainWindow::MainWindow(QWidget *parent)
     _syntaxTimer = new QTimer(this);
     _syntaxTimer->setInterval(1000); // 1000 ms = 1 segundo
     connect(_syntaxTimer, &QTimer::timeout, this, &MainWindow::syntaxTimerTimeout);
+}
+
+//resize editor
+void MainWindow::resizeEvent(QResizeEvent *event) {
+    QMainWindow::resizeEvent(event);
+
+    // Obtenha as novas dimensões da janela
+    QSize newSize = event->size();
+    _editor->resize(newSize);
+
+// Ajuste o tamanho do seu widget filho com base no newSize
+// Exemplo: seuWidgetFilho->resize(newSize.width(), newSize.height());
+
+// Ou ajuste a posição e o tamanho de acordo com a lógica específica
 }
 
 void MainWindow::syntaxTimerTimeout() {
