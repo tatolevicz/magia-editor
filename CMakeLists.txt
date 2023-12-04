@@ -46,15 +46,19 @@ endif()
 
 
 add_subdirectory(external/scintilla)
+add_subdirectory(external/lua)
+add_subdirectory(external/sol2)
+add_subdirectory(external/lexilla)
 
 target_include_directories(TestScintillaCmake PUBLIC
     external/lexilla/include
     external/lexilla/access
+    external/Lua/lua-5.4.6/include
 )
 
 # Adicione o caminho da biblioteca estática
-add_library(lexilla STATIC IMPORTED)
-set_target_properties(lexilla PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/external/lexilla/bin/liblexilla.a")
+#add_library(lexilla STATIC IMPORTED)
+#set_target_properties(lexilla PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/external/lexilla/bin/liblexzilla.a")
 
 
 target_link_libraries(TestScintillaCmake
@@ -62,6 +66,8 @@ target_link_libraries(TestScintillaCmake
     Qt${QT_VERSION_MAJOR}::Widgets
     scintilla-qt-edit
     lexilla
+    lua_static
+    sol2
 )
 
 set_target_properties(TestScintillaCmake PROPERTIES

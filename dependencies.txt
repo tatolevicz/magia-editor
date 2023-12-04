@@ -1,0 +1,14 @@
+Todos os repositórios usados pra fazer esse app demonstrativo estão listados abaixo:
+
+lexilla -> Baixado do fork e está no branch cmake-support
+        https://github.com/tatolevicz/lexilla
+
+scintilla -> Baixado do site oficial e dezipado na pasta do projeto
+    * foi necessário gerar um arquivo CMakelists.txt para que o projeto fosse compilado
+        * peguei o arquivo CMakelists.txt do repositório https://github.com/elcuco/scintilla-code
+
+Lua -> https://github.com/walterschell/Lua
+
+Sol2 -> https://github.com/ThePhD/sol2/blob/develop/examples/customization/source/lua_zm_interop.cpp
+
+TODO:  fazer script shell para instalar as dependências automaticamente baseado nas informações acima
