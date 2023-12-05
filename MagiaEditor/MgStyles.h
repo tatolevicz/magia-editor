@@ -7,7 +7,6 @@
 namespace mg {
     namespace styles{
 
-
         struct Margins {
             inline static int SYMBOLS = 0;
             inline static int NUMBERS = 1;
@@ -193,8 +192,7 @@ namespace mg {
 
                 //SCE_LUA_WORD
 
-                editor->setKeyWords(0,
-                                    "break do else elseif end for function goto if in local repeat return then until while");
+                editor->setKeyWords(0, "break do else elseif end for function goto if in local repeat return then until while");
 
                 //SCE_LUA_WORD2
                 editor->setKeyWords(1, "print");//todo load here know functions

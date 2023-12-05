@@ -45,7 +45,8 @@ namespace mg{
         connect(this, &ScintillaEdit::charAdded, this, &MagiaEditor::onCharAdded);
         connect(this, &ScintillaEdit::modified, this, &MagiaEditor::scriptModified);
         connect(this, &ScintillaEdit::marginClicked, this, &MagiaEditor::onMarginClicked);
-        connect(this, &ScintillaEdit::marginClicked, this, &MagiaEditor::onMarginClicked);
+        connect(this, &ScintillaEdit::dwellStart, this, &MagiaEditor::idleMouseStart);
+        connect(this, &ScintillaEdit::dwellEnd, this, &MagiaEditor::idleMouseEnd);
 
         //lua setup
         _lua = std::make_shared<sol::state>();
@@ -53,14 +54,13 @@ namespace mg{
 
         // syntax timer setup
         _syntaxTimer = new QTimer(this);
-        _syntaxTimer->setInterval(1000); // 1000 ms = 1 segundo
+        _syntaxTimer->setInterval(500); // 1000 ms = 1 segundo
         connect(_syntaxTimer, &QTimer::timeout, this, &MagiaEditor::syntaxTimerTimeout);
+
+        this->setMouseDwellTime(200);
     }
 
-    MagiaEditor::~MagiaEditor(){
-
-    }
-
+    MagiaEditor::~MagiaEditor(){}
 
     void MagiaEditor::syntaxTimerTimeout() {
         int length = this->textLength();
@@ -147,25 +147,38 @@ namespace mg{
         return -1; // Retorna -1 se a sintaxe estiver correta
     }
 
-    int MagiaEditor::extractErrorLine(const std::string& erroMsg) {
+    int MagiaEditor::extractErrorLine(const std::string& errorMsg) {
+        _currentError = errorMsg;
 
         std::regex standard(R"(\]:([0-9]+):)"); // Padrão para capturar o número da linha
         std::smatch results;
 
-        if (std::regex_search(erroMsg, results, standard) && results.size() > 1) {
+        if (std::regex_search(errorMsg, results, standard) && results.size() > 1) {
             return std::stoi(results[1].str()); // Converte o número da linha para inteiro
         }
 
+        _currentError = "";
         return -1; // Retorna -1 se não encontrar o número da linha
     }
 
 
-    void MagiaEditor::dwellStart(int x, int y){
+    void MagiaEditor::idleMouseStart(int x, int y){
+        qDebug() << "dwellStart: " << x << " " << y;
 
+        int pos = positionFromPoint(x, y);
+        int line = lineFromPosition(pos);
+
+        int markerMask = send(SCI_MARKERGET, line);
+        if (markerMask & (1 << styles::Markers::ERROR)) { // errorMarkerNumber é o número do seu marker de erro
+            // Seu código para mostrar o calltip
+            QString errorInfo = _currentError.c_str();
+            send(SCI_CALLTIPSHOW, pos, reinterpret_cast<sptr_t>(errorInfo.toUtf8().constData()));
+        }
     }
 
-    void MagiaEditor::dwellEnd(int x, int y){
-
+    void MagiaEditor::idleMouseEnd(int x, int y){
+        qDebug() << "dwellEnd: " << x << " " << y;
+        send(SCI_CALLTIPCANCEL);
     }
     
 }

@@ -3,9 +3,14 @@
 
 #include <QMainWindow>
 #include <ScintillaEdit.h>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+namespace mg{
+    class MagiaEditor;
+}
 
 namespace sol {
     class state;
@@ -24,32 +29,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-
-    void syntaxTimerTimeout();
-    ScintillaEdit *_editor;
-    void onCharAdded(int ch);
-    void onNewLine();
-    void scriptModified(Scintilla::ModificationFlags type,
-                        Scintilla::Position position,
-                        Scintilla::Position length,
-                        Scintilla::Position linesAdded,
-                        const QByteArray &text,
-                        Scintilla::Position line,
-                        Scintilla::FoldLevel foldNow,
-                        Scintilla::FoldLevel foldPrev);
-
-    void onMarginClicked(Scintilla::Position position,
-                           Scintilla::KeyMod modifiers,
-                           int margin);
-
-    void showAutocomplete();
-    void updateErrorMaker(int errorLine);
-    int extractErrorLine(const std::string& error);
-    int validateLuaScript(const std::string& script);
-    std::shared_ptr<sol::state> _lua{nullptr};
-
-    QTimer* _syntaxTimer{nullptr};
-
-
+    mg::MagiaEditor* _editor{nullptr};
 };
 #endif // MAINWINDOW_H

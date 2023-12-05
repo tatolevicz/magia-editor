@@ -56,16 +56,17 @@ namespace mg{
                              Scintilla::KeyMod modifiers,
                              int margin);
 
-        void dwellStart(int x, int y);
-        void dwellEnd(int x, int y);
+        void idleMouseStart(int x, int y);
+        void idleMouseEnd(int x, int y);
 
         void showAutocomplete();
         void updateErrorMaker(int errorLine);
-        int extractErrorLine(const std::string& error);
+        int extractErrorLine(const std::string& errorMsg);
         int validateLuaScript(const std::string& script);
         std::shared_ptr<sol::state> _lua{nullptr};
 
         QTimer* _syntaxTimer{nullptr};
+        std::string _currentError;
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H

@@ -56,6 +56,7 @@ target_include_directories(TestScintillaCmake PUBLIC
     external/lexilla/include
     external/lexilla/access
     external/Lua/lua-5.4.6/include
+    MagiaEditor
 )
 
 # Adicione o caminho da biblioteca estática
