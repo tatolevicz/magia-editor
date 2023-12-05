@@ -11,19 +11,7 @@
 #include <sol/sol.hpp>
 #include <QTimer>
 #include <regex>
-
-#include <lua.hpp>
-
-void luaDebugHook(lua_State *L, lua_Debug *ar){
-    lua_getinfo(L, "nSl", ar);
-    int currentLine = ar->currentline;
-    std::string currentFunction = ar->name ? ar->name : "unknown";
-//        std::string currentSource = ar->source ? ar->source : "unknown";
-
-    std::cout << "Current Line: " << currentLine << std::endl;
-    std::cout << "Current function: " << currentFunction << std::endl;
-
-}
+#include "MagiaDebugger.h"
 
 namespace mg{
     MagiaEditor::MagiaEditor(QWidget *parent):
@@ -65,8 +53,7 @@ namespace mg{
         _lua = std::make_shared<sol::state>();
         _lua->open_libraries(sol::lib::base);
 
-//        luaL_openlibs(_lua->lua_state());
-        lua_sethook(_lua->lua_state(),luaDebugHook, LUA_MASKLINE, 0);
+        MagiaDebugger::setHook(_lua);
 
         // syntax timer setup
         _syntaxTimer = new QTimer(this);
@@ -100,11 +87,24 @@ namespace mg{
     void MagiaEditor::onMarginClicked(Scintilla::Position position,
                                      Scintilla::KeyMod modifiers,
                                      int margin){
-        // Obter a linha que foi clicada
-        int lineClicked = this->send(SCI_LINEFROMPOSITION, position, 0);
-        qDebug() << "Margin clicked on line " << lineClicked;
-        // Alternar dobradura na linha
-        this->send(SCI_TOGGLEFOLD, lineClicked);
+
+        int lineClicked = send(SCI_LINEFROMPOSITION, position, 0);
+
+        if(margin == styles::Margins::FOLDING) {
+            // Obter a linha que foi clicada
+            qDebug() << "Margin clicked on line " << lineClicked;
+            // Alternar dobradura na linha
+            this->send(SCI_TOGGLEFOLD, lineClicked);
+            return;
+        }
+
+        if(margin == styles::Margins::SYMBOLS){
+            if (send(SCI_MARKERGET, lineClicked) & (1 << styles::Markers::BREAKPOINT)) {
+                send(SCI_MARKERDELETE, lineClicked, styles::Markers::BREAKPOINT);
+            } else {
+                send(SCI_MARKERADD, lineClicked, styles::Markers::BREAKPOINT);
+            }
+        }
     }
 
 

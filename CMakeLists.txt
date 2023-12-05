@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
         MagiaEditor/MgStyles.h
         MagiaEditor/MagiaEditor.cpp
         MagiaEditor/MagiaEditor.h
+        MagiaEditor/MagiaDebugger.cpp
+        MagiaEditor/MagiaDebugger.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -22,7 +22,8 @@ namespace mg {
         struct Markers {
             inline static int ERROR = 1;
             //todo continue adding
-            inline static int OTHERS = 2;
+            inline static int BREAKPOINT = 2;
+            inline static int OTHERS = 3;
         };
 
         struct LuaEditorColors {
@@ -93,15 +94,18 @@ namespace mg {
 
             inline static void setupMarkers(ScintillaEdit *editor) {
 
-                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
-                editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
-                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR); // Permite o marcador de error na margem 1
-
+                //error
                 editor->markerDefine(Markers::ERROR, SC_MARK_CIRCLE);
                 editor->markerSetFore(Markers::ERROR, LuaEditorColors::ERRORS);
                 editor->markerSetBack(Markers::ERROR, LuaEditorColors::ERRORS);
 
-                editor->setMarginBackN(Margins::SYMBOLS, LuaEditorColors::BACKGROUND);
+                //breakpoint
+                editor->markerDefine(Markers::BREAKPOINT, SC_MARK_CIRCLE);
+                editor->markerSetFore(Markers::BREAKPOINT, LuaEditorColors::PRE_PROC);
+                editor->markerSetBack(Markers::BREAKPOINT, LuaEditorColors::PRE_PROC);
+
+
+                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR | 1 << Markers::BREAKPOINT); // Permite o marcador de error na margem 1
             }
 
 
@@ -132,6 +136,10 @@ namespace mg {
                 editor->setMarginWidthN(Margins::NUMBERS, MarginsSize::NUMBERS);
                 editor->setMarginMaskN(Margins::NUMBERS, 0); // nao permite a renderizacao de marcadores na margem 1
 
+                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
+                editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
+                editor->setMarginBackN(Margins::SYMBOLS, LuaEditorColors::BACKGROUND);
+                editor->setMarginSensitiveN(Margins::SYMBOLS, true);
 
                 setupFolding(editor);
                 setupCallTips(editor);
