@@ -168,7 +168,7 @@ namespace mg{
 
         //show error tooltip logic
         if(x <= styles::MarginsSize::SYMBOLS) {
-            int markerMask = send(SCI_MARKERGET, line);
+            int markerMask = markerGet(line);
             int errorMask = (1 << styles::Markers::ERROR);
             if (markerMask & errorMask) {
                 callTipShow(pos, _currentError.c_str());
@@ -177,7 +177,7 @@ namespace mg{
     }
 
     void MagiaEditor::idleMouseEnd(int x, int y){
-        send(SCI_CALLTIPCANCEL);
+        callTipCancel();
     }
     
 }

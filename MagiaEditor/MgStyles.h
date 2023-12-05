@@ -86,6 +86,25 @@ namespace mg {
 
             }
 
+            inline static void setupCallTips(ScintillaEdit *editor) {
+                editor->callTipSetBack(LuaEditorColors::BACKGROUND);
+                editor->callTipSetFore(LuaEditorColors::COMMENT);
+            }
+
+            inline static void setupMarkers(ScintillaEdit *editor) {
+
+                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
+                editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
+                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR); // Permite o marcador de error na margem 1
+
+                editor->markerDefine(Markers::ERROR, SC_MARK_CIRCLE);
+                editor->markerSetFore(Markers::ERROR, LuaEditorColors::ERRORS);
+                editor->markerSetBack(Markers::ERROR, LuaEditorColors::ERRORS);
+
+                editor->setMarginBackN(Margins::SYMBOLS, LuaEditorColors::BACKGROUND);
+            }
+
+
             inline static void setDefaultStyle(ScintillaEdit *editor) {
                 editor->styleSetBack(STYLE_DEFAULT, LuaEditorColors::DARK_BACKGROUND);
                 editor->styleSetFont(STYLE_DEFAULT, "Courier New");
@@ -98,15 +117,12 @@ namespace mg {
 
                 // Habilita a visualização das guias de indentação
 //            editor->send(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
-
-// Ativa a autoindentação
+                // Ativa a autoindentação
 //            editor->send(SCI_SETAUTOINDENT, 1);
-
 
                 editor->setCaretFore(LuaEditorColors::IDENTIFIER);
                 editor->setCaretLineBack(LuaEditorColors::LINE_ACIVE);  // Define a cor de fundo para o destaque
                 editor->setCaretLineFrame(1);
-
 
                 editor->styleSetBack(STYLE_LINENUMBER, LuaEditorColors::BACKGROUND); // Cinza para fundo
                 editor->styleSetFore(STYLE_LINENUMBER, LuaEditorColors::COMMENT); // Branco para texto
@@ -116,19 +132,10 @@ namespace mg {
                 editor->setMarginWidthN(Margins::NUMBERS, MarginsSize::NUMBERS);
                 editor->setMarginMaskN(Margins::NUMBERS, 0); // nao permite a renderizacao de marcadores na margem 1
 
-                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
-                editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
-                editor->setMarginMaskN(Margins::SYMBOLS,
-                                       1 << Markers::ERROR); // Permite o marcador de error na margem 1
 
                 setupFolding(editor);
-
-                int markerBreakpoint = 1; // Escolha um número de índice para o marcador de breakpoint
-                editor->markerDefine(markerBreakpoint, SC_MARK_CIRCLE);
-                editor->markerSetFore(markerBreakpoint, LuaEditorColors::ERRORS);
-                editor->markerSetBack(markerBreakpoint, LuaEditorColors::ERRORS);
-
-                editor->setMarginBackN(Margins::SYMBOLS, LuaEditorColors::BACKGROUND);
+                setupCallTips(editor);
+                setupMarkers(editor);
             }
         };
 
