@@ -12,13 +12,16 @@ namespace sol {
     class state;
 }
 
-namespace mg{
-    class MagiaEditor : public ScintillaEdit{
-        Q_OBJECT
+namespace mg {
+    class MagiaEditor : public ScintillaEdit {
+    Q_OBJECT
+
     public:
         MagiaEditor(QWidget *parent = 0);
         void setup();
+
         virtual ~MagiaEditor();
+
     protected:
 //        bool event(QEvent *event) override;
 //        void paintEvent(QPaintEvent *event) override;
@@ -41,8 +44,11 @@ namespace mg{
 //        void scrollContentsBy(int, int) override {}
 
         void syntaxTimerTimeout();
+
         void onCharAdded(int ch);
+
         void onNewLine();
+
         void scriptModified(Scintilla::ModificationFlags type,
                             Scintilla::Position position,
                             Scintilla::Position length,
@@ -57,21 +63,27 @@ namespace mg{
                              int margin);
 
         void idleMouseStart(int x, int y);
+
         void idleMouseEnd(int x, int y);
 
         void showAutocomplete();
+
         void updateErrorMaker(int errorLine);
-        int extractErrorLine(const std::string& errorMsg);
-        int validateScript(const std::string& script);
-        bool executeScript(const std::string& script);
+
+        int extractErrorLine(const std::string &errorMsg);
+
+        int validateScript(const std::string &script);
+
+        bool executeScript(const std::string &script);
 
 
         bool showErrorIfAny(int x, int line, int pos);
+
         bool showVariableValueIfAny(int pos);
 
         std::shared_ptr<sol::state> _lua{nullptr};
 
-        QTimer* _syntaxTimer{nullptr};
+        QTimer *_syntaxTimer{nullptr};
         std::string _currentError;
     };
 }

@@ -12,6 +12,19 @@
 #include <QTimer>
 #include <regex>
 
+#include <lua.hpp>
+
+void luaDebugHook(lua_State *L, lua_Debug *ar){
+    lua_getinfo(L, "nSl", ar);
+    int currentLine = ar->currentline;
+    std::string currentFunction = ar->name ? ar->name : "unknown";
+//        std::string currentSource = ar->source ? ar->source : "unknown";
+
+    std::cout << "Current Line: " << currentLine << std::endl;
+    std::cout << "Current function: " << currentFunction << std::endl;
+
+}
+
 namespace mg{
     MagiaEditor::MagiaEditor(QWidget *parent):
     ScintillaEdit(parent){}
@@ -51,6 +64,9 @@ namespace mg{
         //lua setup
         _lua = std::make_shared<sol::state>();
         _lua->open_libraries(sol::lib::base);
+
+//        luaL_openlibs(_lua->lua_state());
+        lua_sethook(_lua->lua_state(),luaDebugHook, LUA_MASKLINE, 0);
 
         // syntax timer setup
         _syntaxTimer = new QTimer(this);
@@ -250,5 +266,7 @@ namespace mg{
         _lua->stack_clear();
         return output; // Variável não encontrada ou erro
     }
-    
+
+
+
 }
