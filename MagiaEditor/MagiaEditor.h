@@ -62,7 +62,9 @@ namespace mg{
         void showAutocomplete();
         void updateErrorMaker(int errorLine);
         int extractErrorLine(const std::string& errorMsg);
-        int validateLuaScript(const std::string& script);
+        int validateScript(const std::string& script);
+        bool executeScript(const std::string& script);
+
 
         bool showErrorIfAny(int x, int line, int pos);
         bool showVariableValueIfAny(int pos);

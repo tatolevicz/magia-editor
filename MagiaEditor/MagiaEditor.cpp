@@ -65,7 +65,7 @@ namespace mg{
     void MagiaEditor::syntaxTimerTimeout() {
         int length = this->textLength();
         std::string script = this->getText(length).toStdString();
-        int errorLine = validateLuaScript(script);
+        int errorLine = validateScript(script);
         updateErrorMaker(errorLine);
     }
 
@@ -133,7 +133,7 @@ namespace mg{
         }
     }
 
-    int MagiaEditor::validateLuaScript(const std::string& script) {
+    int MagiaEditor::validateScript(const std::string& script) {
 
         sol::load_result result = _lua->load(script);
 //        auto result = _lua->script(script);
@@ -146,6 +146,18 @@ namespace mg{
         }
 
         return -1; // Retorna -1 se a sintaxe estiver correta
+    }
+
+    bool MagiaEditor::executeScript(const std::string& script) {
+        try {
+            _lua->script(script);
+        }
+        catch(const sol::error& err){
+            std::cerr << "Error: " << err.what();
+            return false;
+        }
+
+        return true;
     }
 
     int MagiaEditor::extractErrorLine(const std::string& errorMsg) {
@@ -205,12 +217,14 @@ namespace mg{
 
         int length = this->textLength();
         std::string script = this->getText(length).toStdString();
-        if (validateLuaScript(script) != -1)
+        if (validateScript(script) != -1)
             return false; // Erro no script
 
-        _lua->script(script); // Executar o script
+        if(!executeScript(script))
+            return false;
 
         bool output = false;
+
         sol::object luaVar = (*_lua)[wordUnderCursor];
         if (luaVar.valid()) {
             bool shouldShow = false;
