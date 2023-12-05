@@ -63,6 +63,10 @@ namespace mg{
         void updateErrorMaker(int errorLine);
         int extractErrorLine(const std::string& errorMsg);
         int validateLuaScript(const std::string& script);
+
+        bool showErrorIfAny(int x, int line, int pos);
+        bool showVariableValueIfAny(int pos);
+
         std::shared_ptr<sol::state> _lua{nullptr};
 
         QTimer* _syntaxTimer{nullptr};

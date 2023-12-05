@@ -136,6 +136,7 @@ namespace mg{
     int MagiaEditor::validateLuaScript(const std::string& script) {
 
         sol::load_result result = _lua->load(script);
+//        auto result = _lua->script(script);
         if (!result.valid()) {
             sol::error err = result;
             std::string errorMsg = err.what();
@@ -167,17 +168,73 @@ namespace mg{
         int line = lineFromPosition(pos);
 
         //show error tooltip logic
+        showErrorIfAny(x, line , pos);
+        showVariableValueIfAny(pos);
+    }
+
+    void MagiaEditor::idleMouseEnd(int x, int y){
+        callTipCancel();
+    }
+
+    bool MagiaEditor::showErrorIfAny(int x, int line, int pos){
+        //show error tooltip logic
         if(x <= styles::MarginsSize::SYMBOLS) {
             int markerMask = markerGet(line);
             int errorMask = (1 << styles::Markers::ERROR);
             if (markerMask & errorMask) {
                 callTipShow(pos, _currentError.c_str());
             }
+            return true;
         }
+
+        return false;
     }
 
-    void MagiaEditor::idleMouseEnd(int x, int y){
-        callTipCancel();
+    bool MagiaEditor::showVariableValueIfAny(int pos) {
+
+        int startPos = wordStartPosition(pos, true);
+        int endPos = wordEndPosition(pos, true);
+
+        auto wordArray = textRange(startPos, endPos);
+
+        // Agora você tem a palavra sob o cursor do mouse
+        std::string wordUnderCursor = wordArray.toStdString();
+
+        if(wordUnderCursor.empty())
+            return false;
+
+        int length = this->textLength();
+        std::string script = this->getText(length).toStdString();
+        if (validateLuaScript(script) != -1)
+            return false; // Erro no script
+
+        _lua->script(script); // Executar o script
+
+        bool output = false;
+        sol::object luaVar = (*_lua)[wordUnderCursor];
+        if (luaVar.valid()) {
+            bool shouldShow = false;
+            std::string varValue;
+            if (luaVar.get_type() == sol::type::string) {
+                varValue = luaVar.as<std::string>();
+                shouldShow = true;
+            } else if (luaVar.get_type() == sol::type::number) {
+                varValue = std::to_string(luaVar.as<double>());
+                shouldShow = true;
+            }
+            else if (luaVar.get_type() == sol::type::boolean) {
+                varValue = std::to_string(luaVar.as<bool>());
+                shouldShow = true;
+            }
+
+            if(shouldShow)
+                callTipShow(pos, varValue.c_str());
+
+            output = true;
+        }
+
+        _lua->stack_clear();
+        return output; // Variável não encontrada ou erro
     }
     
 }
