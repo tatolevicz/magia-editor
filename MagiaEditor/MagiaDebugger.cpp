@@ -27,10 +27,10 @@ namespace mg{
     }
 
     void MagiaDebugger::appendBreakpoint(int line){
-        breakpoints.insert(line);
+        breakpoints.insert(line + 1);
     }
 
     void MagiaDebugger::removeBreakpoint(int line){
-        breakpoints.erase(line);
+        breakpoints.erase(line + 1);
     }
 }

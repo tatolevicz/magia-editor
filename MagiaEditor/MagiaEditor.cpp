@@ -166,16 +166,20 @@ namespace mg{
         return -1; // Retorna -1 se a sintaxe estiver correta
     }
 
-    bool MagiaEditor::executeScript(const std::string& script) {
-        try {
-            _lua->script(script);
-        }
-        catch(const sol::error& err){
-            std::cerr << "Error: " << err.what();
-            return false;
-        }
+    void MagiaEditor::executeScript(const std::string& script, const ScriptExecutionCallback& cb) {
 
-        return true;
+        _scriptWorker = std::thread([this, script, cb](){
+            try {
+                _lua->script(script);
+            }
+            catch(const sol::error& err){
+                std::cerr << "Error: " << err.what();
+                cb(false);
+            }
+
+            cb(true);
+        });
+        _scriptWorker.detach();
     }
 
     int MagiaEditor::extractErrorLine(const std::string& errorMsg) {
@@ -220,7 +224,7 @@ namespace mg{
         return false;
     }
 
-    bool MagiaEditor::showVariableValueIfAny(int pos) {
+    void MagiaEditor::showVariableValueIfAny(int pos) {
 
         int startPos = wordStartPosition(pos, true);
         int endPos = wordEndPosition(pos, true);
@@ -231,42 +235,45 @@ namespace mg{
         std::string wordUnderCursor = wordArray.toStdString();
 
         if(wordUnderCursor.empty())
-            return false;
+            return;
 
         int length = this->textLength();
         std::string script = this->getText(length).toStdString();
         if (validateScript(script) != -1)
-            return false; // Erro no script
+            return; // Erro no script
 
-        if(!executeScript(script))
-            return false;
+        executeScript(script,[this, wordUnderCursor, pos](bool success){
+            if(!success)
+                return;
 
-        bool output = false;
+            sol::object luaVar = (*_lua)[wordUnderCursor];
+            if (luaVar.valid()) {
+                bool shouldShow = false;
+                std::string varValue;
+                if (luaVar.get_type() == sol::type::string) {
+                    varValue = luaVar.as<std::string>();
+                    shouldShow = true;
+                } else if (luaVar.get_type() == sol::type::number) {
+                    varValue = std::to_string(luaVar.as<double>());
+                    shouldShow = true;
+                }
+                else if (luaVar.get_type() == sol::type::boolean) {
+                    varValue = std::to_string(luaVar.as<bool>());
+                    shouldShow = true;
+                }
 
-        sol::object luaVar = (*_lua)[wordUnderCursor];
-        if (luaVar.valid()) {
-            bool shouldShow = false;
-            std::string varValue;
-            if (luaVar.get_type() == sol::type::string) {
-                varValue = luaVar.as<std::string>();
-                shouldShow = true;
-            } else if (luaVar.get_type() == sol::type::number) {
-                varValue = std::to_string(luaVar.as<double>());
-                shouldShow = true;
+                if(shouldShow) {
+                    QMetaObject::invokeMethod(this,
+                        [this, pos, varValue]() {
+                          callTipShow(pos, varValue.c_str());
+                        },
+                        Qt::QueuedConnection);
+                }
             }
-            else if (luaVar.get_type() == sol::type::boolean) {
-                varValue = std::to_string(luaVar.as<bool>());
-                shouldShow = true;
-            }
 
-            if(shouldShow)
-                callTipShow(pos, varValue.c_str());
-
-            output = true;
-        }
-
-        _lua->stack_clear();
-        return output; // Variável não encontrada ou erro
+            _lua->stack_clear();
+            std::cout << "Script execution ended!\n";
+        });
     }
 
 

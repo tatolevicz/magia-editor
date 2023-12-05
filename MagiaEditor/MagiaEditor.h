@@ -7,6 +7,7 @@
 
 
 #include "ScintillaEdit.h"
+#include <thread>
 
 namespace sol {
     class state;
@@ -17,6 +18,8 @@ namespace mg {
     Q_OBJECT
 
     public:
+        using ScriptExecutionCallback = std::function<void(bool)>;
+
         MagiaEditor(QWidget *parent = 0);
         void setup();
 
@@ -74,17 +77,17 @@ namespace mg {
 
         int validateScript(const std::string &script);
 
-        bool executeScript(const std::string &script);
-
+        void executeScript(const std::string &script,const ScriptExecutionCallback& cb);
 
         bool showErrorIfAny(int x, int line, int pos);
 
-        bool showVariableValueIfAny(int pos);
+        void showVariableValueIfAny(int pos);
 
         std::shared_ptr<sol::state> _lua{nullptr};
 
         QTimer *_syntaxTimer{nullptr};
         std::string _currentError;
+        std::thread _scriptWorker;
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H
