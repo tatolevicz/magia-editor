@@ -101,8 +101,10 @@ namespace mg{
         if(margin == styles::Margins::SYMBOLS){
             if (send(SCI_MARKERGET, lineClicked) & (1 << styles::Markers::BREAKPOINT)) {
                 send(SCI_MARKERDELETE, lineClicked, styles::Markers::BREAKPOINT);
+                MagiaDebugger::removeBreakpoint(lineClicked);
             } else {
                 send(SCI_MARKERADD, lineClicked, styles::Markers::BREAKPOINT);
+                MagiaDebugger::appendBreakpoint(lineClicked);
             }
         }
     }

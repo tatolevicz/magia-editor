@@ -6,24 +6,30 @@
 #define MAGIADEBUGGER_H
 
 #include <memory>
+#include <unordered_set>
 
 namespace sol{
     class state;
 }
 
 namespace mg{
+
     class MagiaDebugger {
-
-    enum class DebuggerState {
-        Running,
-        Paused,
-        Step
-    };
-
     public:
-        MagiaDebugger();
-        ~MagiaDebugger();
+        enum class DebuggerState {
+            Running,
+            Paused,
+            Step
+        };
+
+        inline static std::unordered_set<int> breakpoints;
         static void setHook(const std::shared_ptr<sol::state>& sol);
+        static void appendBreakpoint(int line);
+        static void removeBreakpoint(int line);
+        inline static DebuggerState state = DebuggerState::Running;
+
+    private:
+
     };
 
 }
