@@ -4,7 +4,7 @@
 #include <SciLexer.h>
 #include <ILexer.h>
 #include <Lexilla.h>
-#include "MyStyles.h"
+#include "MagiaEditor/MgStyles.h"
 #include <sol/sol.hpp>
 #include <regex>
 #include <QTimer>
@@ -37,8 +37,8 @@ MainWindow::MainWindow(QWidget *parent)
     _editor->setILexer((sptr_t)(void*)lex);
 
 
-    mystyles::editor::setDefaultStyle(_editor);
-    mystyles::lua::setDefaultStyle(_editor);
+    mg::styles::editor::setDefaultStyle(_editor);
+    mg::styles::lua::setDefaultStyle(_editor);
 
     _editor->autoCSetMaxWidth(50);
     _editor->autoCSetMaxHeight(10);
@@ -63,14 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
 
-    // Obtenha as novas dimensões da janela
     QSize newSize = event->size();
     _editor->resize(newSize);
-
-// Ajuste o tamanho do seu widget filho com base no newSize
-// Exemplo: seuWidgetFilho->resize(newSize.width(), newSize.height());
-
-// Ou ajuste a posição e o tamanho de acordo com a lógica específica
 }
 
 void MainWindow::syntaxTimerTimeout() {
@@ -91,6 +85,7 @@ void MainWindow::scriptModified(Scintilla::ModificationFlags type,
 {
     _syntaxTimer->start();
 }
+
 void MainWindow::onMarginClicked(Scintilla::Position position,
                      Scintilla::KeyMod modifiers,
                      int margin){
@@ -105,7 +100,6 @@ void MainWindow::onMarginClicked(Scintilla::Position position,
 void MainWindow::onCharAdded(int ch) {
     // Implementação de lógica de quando mostrar o autocomplete
     if (ch == '(' || ch == ' ') {
-//        _editor->markerAdd(0, 1);  // 10 é o número da linha, 0 é o índice do marcador
         // Exemplo: mostrar autocomplete após '(' ou ' '
         showAutocomplete();
     }
@@ -113,7 +107,6 @@ void MainWindow::onCharAdded(int ch) {
         onNewLine();
     }
     else {
-//        _editor->markerDelete(0, 1);
     }
 }
 
