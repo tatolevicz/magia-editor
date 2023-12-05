@@ -54,7 +54,7 @@ namespace mg{
 
         // syntax timer setup
         _syntaxTimer = new QTimer(this);
-        _syntaxTimer->setInterval(500); // 1000 ms = 1 segundo
+        _syntaxTimer->setInterval(800); // 1000 ms = 1 segundo
         connect(_syntaxTimer, &QTimer::timeout, this, &MagiaEditor::syntaxTimerTimeout);
 
         this->setMouseDwellTime(200);
@@ -163,21 +163,18 @@ namespace mg{
 
 
     void MagiaEditor::idleMouseStart(int x, int y){
-        qDebug() << "dwellStart: " << x << " " << y;
-
         int pos = positionFromPoint(x, y);
         int line = lineFromPosition(pos);
 
         int markerMask = send(SCI_MARKERGET, line);
-        if (markerMask & (1 << styles::Markers::ERROR)) { // errorMarkerNumber é o número do seu marker de erro
+        int errorMask = (1 << styles::Markers::ERROR);
+        if (markerMask & errorMask) {
             // Seu código para mostrar o calltip
-            QString errorInfo = _currentError.c_str();
-            send(SCI_CALLTIPSHOW, pos, reinterpret_cast<sptr_t>(errorInfo.toUtf8().constData()));
+            callTipShow(pos, _currentError.c_str());
         }
     }
 
     void MagiaEditor::idleMouseEnd(int x, int y){
-        qDebug() << "dwellEnd: " << x << " " << y;
         send(SCI_CALLTIPCANCEL);
     }
     
