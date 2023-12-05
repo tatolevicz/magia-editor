@@ -166,11 +166,13 @@ namespace mg{
         int pos = positionFromPoint(x, y);
         int line = lineFromPosition(pos);
 
-        int markerMask = send(SCI_MARKERGET, line);
-        int errorMask = (1 << styles::Markers::ERROR);
-        if (markerMask & errorMask) {
-            // Seu código para mostrar o calltip
-            callTipShow(pos, _currentError.c_str());
+        //show error tooltip logic
+        if(x <= styles::MarginsSize::SYMBOLS) {
+            int markerMask = send(SCI_MARKERGET, line);
+            int errorMask = (1 << styles::Markers::ERROR);
+            if (markerMask & errorMask) {
+                callTipShow(pos, _currentError.c_str());
+            }
         }
     }
 

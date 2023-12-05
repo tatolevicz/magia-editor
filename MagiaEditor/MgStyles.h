@@ -13,6 +13,12 @@ namespace mg {
             inline static int FOLDING = 2;
         };
 
+        struct MarginsSize {
+            inline static int SYMBOLS = 30;
+            inline static int NUMBERS = 25;
+            inline static int FOLDING = 16;
+        };
+
         struct Markers {
             inline static int ERROR = 1;
             //todo continue adding
@@ -39,7 +45,7 @@ namespace mg {
         struct editor {
             inline static void setupFolding(ScintillaEdit *editor) {
                 // Configurar a margin para dobradura (número da margin, geralmente 2 para dobradura)
-                int marginWidth = 16; // Largura da margin em pixels
+                int marginWidth = MarginsSize::FOLDING; // Largura da margin em pixels
 
                 editor->send(SCI_SETMARGINWIDTHN, Margins::FOLDING, marginWidth);
                 editor->send(SCI_SETMARGINMASKN, Margins::FOLDING, SC_MASK_FOLDERS);
@@ -107,10 +113,10 @@ namespace mg {
                 editor->styleSetSize(STYLE_LINENUMBER, 12);
 
                 editor->setMarginTypeN(Margins::NUMBERS, SC_MARGIN_NUMBER);
-                editor->setMarginWidthN(Margins::NUMBERS, 25);
+                editor->setMarginWidthN(Margins::NUMBERS, MarginsSize::NUMBERS);
                 editor->setMarginMaskN(Margins::NUMBERS, 0); // nao permite a renderizacao de marcadores na margem 1
 
-                editor->setMarginWidthN(Margins::SYMBOLS, 30);
+                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
                 editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
                 editor->setMarginMaskN(Margins::SYMBOLS,
                                        1 << Markers::ERROR); // Permite o marcador de error na margem 1
