@@ -23,7 +23,8 @@ namespace mg {
             inline static int ERROR = 1;
             //todo continue adding
             inline static int BREAKPOINT = 2;
-            inline static int OTHERS = 3;
+            inline static int BREAKPOINT_BACKGROUND = 3;
+            inline static int OTHERS = 4;
         };
 
         struct LuaEditorColors {
@@ -104,6 +105,10 @@ namespace mg {
                 editor->markerSetFore(Markers::BREAKPOINT, LuaEditorColors::PRE_PROC);
                 editor->markerSetBack(Markers::BREAKPOINT, LuaEditorColors::PRE_PROC);
 
+                editor->markerDefine(Markers::BREAKPOINT_BACKGROUND, SC_MARK_BACKGROUND);
+                editor->markerSetFore(Markers::BREAKPOINT_BACKGROUND, LuaEditorColors::LINE_ACIVE);
+                editor->markerSetBack(Markers::BREAKPOINT_BACKGROUND, LuaEditorColors::LINE_ACIVE);
+
 
                 editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR | 1 << Markers::BREAKPOINT); // Permite o marcador de error na margem 1
             }
@@ -118,6 +123,10 @@ namespace mg {
                 editor->send(SCI_SETTABWIDTH, 2);
                 editor->send(SCI_SETUSETABS, 1); // Use 1 para usar tabs reais
 
+
+                //selection
+                editor->setSelBack(true, LuaEditorColors::LINE_ACIVE);
+                editor->setSelFore(true, LuaEditorColors::IDENTIFIER);
 
                 // Habilita a visualização das guias de indentação
 //            editor->send(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
