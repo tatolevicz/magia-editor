@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <regex>
 #include "MagiaDebugger.h"
+#include <lua.hpp>
 
 namespace mg{
     MagiaEditor::MagiaEditor(QWidget *parent):
@@ -105,6 +106,31 @@ namespace mg{
                 _printCallback(output);
         });
 
+
+        MagiaDebugger::setPauseCallback([this](void *L, void *ar){
+
+            _lua_state_on_pause = L;
+            _debug_state_on_pause = ar;
+
+//            auto *state = (lua_State *)L;
+//            auto *debug = (lua_Debug *)ar;
+//            const char* varName;
+//            int index = 1;
+//            while ((varName = lua_getlocal(state, debug, index)) != NULL) {
+//                if (strcmp(varName, "a") == 0) {
+//                    // A variável foi encontrada, faça algo com ela
+//                    if (lua_isnumber(state, -1)) {
+//                        double valor = lua_tonumber(state, -1);
+//                        // Use o valor...
+//                    }
+//                    lua_pop(state, 1);  // Remover a variável da pilha
+//                    break;
+//                }
+//                lua_pop(state, 1);  // Remover a variável da pilha
+//                index++;
+//            }
+
+        });
     }
 
     MagiaEditor::~MagiaEditor(){}
@@ -249,7 +275,7 @@ namespace mg{
         //show error tooltip logic
         showErrorIfAny(x, line , pos);
 
-        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Step)
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused)
             showVariableValueIfAny(pos);
     }
 
@@ -283,6 +309,29 @@ namespace mg{
 
         if(wordUnderCursor.empty())
             return;
+
+        auto *state = (lua_State *)_lua_state_on_pause;
+        auto *debug = (lua_Debug *)_debug_state_on_pause;
+        const char* varName;
+        int index = 1;
+        std::string varValue;
+        while ((varName = lua_getlocal(state, debug, index)) != NULL) {
+            if (strcmp(varName, wordUnderCursor.c_str()) == 0) {
+                varValue = lua_tostring(state, -1);
+                lua_pop(state, 1);  // Remover a variável da pilha
+                break;
+            }
+            lua_pop(state, 1);  // Remover a variável da pilha
+            index++;
+        }
+
+        if(!varValue.empty()){
+            QMetaObject::invokeMethod(this,
+            [this, pos, varValue]() {
+              callTipShow(pos, varValue.c_str());
+            },
+            Qt::QueuedConnection);
+        }
 
 //        int length = this->textLength();
 //        std::string script = this->getText(length).toStdString();

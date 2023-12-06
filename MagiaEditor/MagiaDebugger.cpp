@@ -21,6 +21,8 @@ namespace mg{
 
         if(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Step){
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Paused;
+            if(MagiaDebugger::pauseCallback)
+                MagiaDebugger::pauseCallback(L, ar);
         }
 
         while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused) {
@@ -40,4 +42,9 @@ namespace mg{
     void MagiaDebugger::removeBreakpoint(int line){
         breakpoints.erase(line + 1);
     }
+
+    void MagiaDebugger::setPauseCallback(const PauseCallback& cb){
+        pauseCallback = cb;
+    }
+
 }

@@ -16,6 +16,7 @@ namespace mg{
 
     class MagiaDebugger {
     public:
+        using PauseCallback = std::function<void(void* L, void* ar)>;
         enum class DebuggerState {
             Coding,
             Running,
@@ -29,8 +30,9 @@ namespace mg{
         static void removeBreakpoint(int line);
         inline static DebuggerState state = DebuggerState::Coding;
 
-    private:
+        static void setPauseCallback(const PauseCallback& cb);
 
+        inline static PauseCallback pauseCallback{nullptr};
     };
 
 }

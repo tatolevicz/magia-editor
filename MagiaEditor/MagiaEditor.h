@@ -103,6 +103,8 @@ namespace mg {
         std::string _currentError;
         std::thread _scriptWorker;
         PrintCallback _printCallback{nullptr};
+        void *_lua_state_on_pause{nullptr};
+        void *_debug_state_on_pause{nullptr};
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H
