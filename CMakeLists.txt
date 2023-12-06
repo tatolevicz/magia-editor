@@ -23,7 +23,7 @@ set(PROJECT_SOURCES
         MagiaEditor/MagiaEditor.h
         MagiaEditor/MagiaDebugger.cpp
         MagiaEditor/MagiaDebugger.h
-)
+        CustomPlainTextEdit.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(TestScintillaCmake

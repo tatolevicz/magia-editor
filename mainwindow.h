@@ -16,6 +16,7 @@ namespace sol {
     class state;
 }
 
+class QPlainTextEdit;
 
 class MainWindow : public QMainWindow
 {
@@ -30,5 +31,6 @@ public:
 private:
     Ui::MainWindow *ui;
     mg::MagiaEditor* _editor{nullptr};
+    QPlainTextEdit* _console{nullptr};
 };
 #endif // MAINWINDOW_H
