@@ -37,32 +37,12 @@ namespace mg {
         void continueExecution();
 
     signals:
+        void scriptStarted();
         void scriptPaused();
         void scriptFinished();
 
 
     protected:
-//        bool event(QEvent *event) override;
-//        void paintEvent(QPaintEvent *event) override;
-//        void wheelEvent(QWheelEvent *event) override;
-//        void focusInEvent(QFocusEvent *event) override;
-//        void focusOutEvent(QFocusEvent *event) override;
-//        void resizeEvent(QResizeEvent *event) override;
-//        void keyPressEvent(QKeyEvent *event) override;
-//        void mousePressEvent(QMouseEvent *event) override;
-//        void mouseReleaseEvent(QMouseEvent *event) override;
-//        void mouseDoubleClickEvent(QMouseEvent *event) override;
-//        void mouseMoveEvent(QMouseEvent *event) override;
-//        void contextMenuEvent(QContextMenuEvent *event) override;
-//        void dragEnterEvent(QDragEnterEvent *event) override;
-//        void dragLeaveEvent(QDragLeaveEvent *event) override;
-//        void dragMoveEvent(QDragMoveEvent *event) override;
-//        void dropEvent(QDropEvent *event) override;
-//        void inputMethodEvent(QInputMethodEvent *event) override;
-//        QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
-//        void scrollContentsBy(int, int) override {}
-        void internalExecute();
-
         void syntaxTimerTimeout();
 
         void onCharAdded(int ch);
@@ -109,6 +89,9 @@ namespace mg {
         void *_lua_state_on_pause{nullptr};
         void *_debug_state_on_pause{nullptr};
         bool _isPausedInsideFunction{false};
+
+    private:
+        void internalExecute();
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H

@@ -25,6 +25,7 @@ namespace mg {
         void onStopClicked();
         void onScriptPaused();
         void onScriptFinished();
+        void onScriptStarted();
 
         QWidget* getCentralWidget();
     private:

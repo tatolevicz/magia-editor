@@ -70,6 +70,7 @@ namespace mg{
 
         connect(_editor, &mg::MagiaEditor::scriptFinished, this, &MagiaEditorWidget::onScriptFinished);
         connect(_editor, &mg::MagiaEditor::scriptPaused, this, &MagiaEditorWidget::onScriptPaused);
+        connect(_editor, &mg::MagiaEditor::scriptStarted, this, &MagiaEditorWidget::onScriptStarted);
 
         _editor->setPrintCallback([this](const std::string& print){
             QMetaObject::invokeMethod(this, [this, print](){
@@ -199,6 +200,10 @@ namespace mg{
 
     void MagiaEditorWidget::onScriptFinished(){
         updateActions();
+    }
+
+    void MagiaEditorWidget::onScriptStarted() {
+        _console->clear();
     }
 
     QWidget* MagiaEditorWidget::getCentralWidget(){

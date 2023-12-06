@@ -415,6 +415,7 @@ namespace mg{
     }
 
     void MagiaEditor::internalExecute(){
+        emit scriptStarted();
         auto length = this->textLength();
         std::string script = this->getText(length).toStdString();
         executeScript(script,[this](bool success, const std::string& msg){
