@@ -107,11 +107,16 @@ namespace mg{
         });
 
 
-        MagiaDebugger::setPauseCallback([this](void *L, void *ar, const std::string& functionName){
+        MagiaDebugger::setPauseCallback([this](void *L, void *ar, int line, const std::string& functionName){
 
             _isPausedInsideFunction = functionName != "global";
             _lua_state_on_pause = L;
             _debug_state_on_pause = ar;
+
+            QMetaObject::invokeMethod(this, [this,line](){
+                send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED);
+                send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+            });
 
 //            auto *state = (lua_State *)L;
 //            auto *debug = (lua_Debug *)ar;
@@ -408,6 +413,8 @@ namespace mg{
 
 
     void MagiaEditor::execute(){
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
 
         if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused){
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Step;

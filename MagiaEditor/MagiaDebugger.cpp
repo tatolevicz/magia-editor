@@ -22,12 +22,11 @@ namespace mg{
         if(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Step){
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Paused;
             if(MagiaDebugger::pauseCallback)
-                MagiaDebugger::pauseCallback(L, ar, currentFunction);
+                MagiaDebugger::pauseCallback(L, ar, currentLine - 1, currentFunction);
         }
 
         while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            //todo highlight current line
         }
     }
 

@@ -24,7 +24,9 @@ namespace mg {
             //todo continue adding
             inline static int BREAKPOINT = 2;
             inline static int BREAKPOINT_BACKGROUND = 3;
-            inline static int OTHERS = 4;
+            inline static int BREAKPOINT_ACHIEVED = 4;
+            inline static int BREAKPOINT_ACHIEVED_BACKGROUND = 5;
+            inline static int OTHERS = 6;
         };
 
         struct LuaEditorColors {
@@ -42,6 +44,7 @@ namespace mg {
             inline static int OPEN_STRING = 0xE7BEB4; // Strings
             inline static int OPERATOR = 0xD98E6C; // Operadores
             inline static int CONSTANT = 0xAAB362; // Constantes (nil, true, false)
+            inline static int LINE_PAUSED = 0x2D4B4B; // Breakpoint achieved
         };
 
         struct editor {
@@ -109,8 +112,16 @@ namespace mg {
                 editor->markerSetFore(Markers::BREAKPOINT_BACKGROUND, LuaEditorColors::LINE_ACIVE);
                 editor->markerSetBack(Markers::BREAKPOINT_BACKGROUND, LuaEditorColors::LINE_ACIVE);
 
+                editor->markerDefine(Markers::BREAKPOINT_ACHIEVED, SC_MARK_CIRCLE);
+                editor->markerSetFore(Markers::BREAKPOINT_ACHIEVED, LuaEditorColors::NUMBER);
+                editor->markerSetBack(Markers::BREAKPOINT_ACHIEVED, LuaEditorColors::NUMBER);
 
-                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR | 1 << Markers::BREAKPOINT); // Permite o marcador de error na margem 1
+                editor->markerDefine(Markers::BREAKPOINT_ACHIEVED_BACKGROUND, SC_MARK_BACKGROUND);
+                editor->markerSetFore(Markers::BREAKPOINT_ACHIEVED_BACKGROUND, LuaEditorColors::LINE_PAUSED);
+                editor->markerSetBack(Markers::BREAKPOINT_ACHIEVED_BACKGROUND, LuaEditorColors::LINE_PAUSED);
+
+
+                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR | 1 << Markers::BREAKPOINT | 1 << Markers::BREAKPOINT_ACHIEVED); // Permite o marcador de error na margem 1
             }
 
 
