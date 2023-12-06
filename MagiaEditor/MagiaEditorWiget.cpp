@@ -4,6 +4,7 @@
 
 #include "MagiaEditorWidget.h"
 #include <MagiaEditor.h>
+#include <MagiaDebugger.h>
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -20,37 +21,10 @@ namespace mg{
         _editor = new mg::MagiaEditor(_centralWidget);
         _editor->setup();
 
-        _editor->setPrintCallback([this](const std::string& print){
-            QMetaObject::invokeMethod(this, [this, print](){
-                _console->appendPlainText(print.c_str());
-            });
-        });
-
         _scriptToolBar = new QToolBar("Control Bar", this);
         _scriptToolBar->setStyleSheet("background-color: #24283B;  border-right: 1px solid #24283B;");
-        _scriptToolBar->setIconSize(QSize(16, 16));  // Define o tamanho dos ícones
-        _scriptToolBar->setMovable(false);  // Torna a barra de ferramentas não-movível
-
-
-        auto* spacerLeft = new QWidget();
-        spacerLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        _scriptToolBar->addWidget(spacerLeft);
-
-        QAction* playAction = _scriptToolBar->addAction(QIcon(":/resources/images/play_active.svg"), "Play");
-        QAction* debugAction = _scriptToolBar->addAction(QIcon(":/resources/images/debug_active.svg"), "Debug");
-        QAction* stopAction = _scriptToolBar->addAction(QIcon(":/resources/images/stop_active.svg"), "Stop");
-
-        auto* spacerRight = new QWidget();
-        spacerRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        _scriptToolBar->addWidget(spacerRight);
-
-        layout->addWidget(_scriptToolBar);  // Adiciona a barra de ferramentas à janela principal
-
-        connect(playAction, &QAction::triggered, this, &MagiaEditorWidget::onPlayClicked);
-        connect(debugAction, &QAction::triggered, this, &MagiaEditorWidget::onDebugClicked);
-        connect(stopAction, &QAction::triggered, this, &MagiaEditorWidget::onStopClicked);
-
-        layout->addWidget(_editor);
+        _scriptToolBar->setIconSize(QSize(16, 16));
+        _scriptToolBar->setMovable(false);
 
         auto* bottomWidget = new QWidget(this);
         bottomWidget->setMaximumHeight(150);
@@ -67,14 +41,19 @@ namespace mg{
         _debugToolBar->setIconSize(QSize(14, 14));  // Define o tamanho dos ícones
         _debugToolBar->setMovable(false);  // Torna a barra de ferramentas não-movível
 
-        auto* stepOverAction = new QAction(QIcon(":/resources/images/step_over_active.svg"), "Step Over", this);
-        auto* stepIntoAction = new QAction(QIcon(":/resources/images/continue_active.svg"), "Step Into", this);
+        auto* spacerLeft = new QWidget();
+        spacerLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        _scriptToolBar->addWidget(spacerLeft);
 
-        _debugToolBar->addAction(stepOverAction);
-        _debugToolBar->addAction(stepIntoAction);
+        //called here in the middle of the spacers to make the icons be in the middle of the toolbar
+        setupActions();
 
-        connect(stepOverAction, &QAction::triggered, this, &MagiaEditorWidget::onStepOver);
-        connect(stepIntoAction, &QAction::triggered, this, &MagiaEditorWidget::onContinue);
+        auto* spacerRight = new QWidget();
+        spacerRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        _scriptToolBar->addWidget(spacerRight);
+
+        layout->addWidget(_scriptToolBar);  // Adiciona a barra de ferramentas à janela principal
+        layout->addWidget(_editor);
 
         bottomLayout->addWidget(_debugToolBar);
 
@@ -89,51 +68,140 @@ namespace mg{
 
         layout->addWidget(bottomWidget);
 
-        connect(_editor, &mg::MagiaEditor::scriptFinished, this,
-        [](bool success, const std::string& msg){
-            qDebug() << "Script finished with success: " << success << " and message: " << msg.c_str();
+        connect(_editor, &mg::MagiaEditor::scriptFinished, this, &MagiaEditorWidget::onScriptFinished);
+        connect(_editor, &mg::MagiaEditor::scriptPaused, this, &MagiaEditorWidget::onScriptPaused);
+
+        _editor->setPrintCallback([this](const std::string& print){
+            QMetaObject::invokeMethod(this, [this, print](){
+                _console->appendPlainText(print.c_str());
+            });
         });
+
+        //set the initial state
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+        updateActions();
     }
 
 
+    void MagiaEditorWidget::setupActions() {
+        _playAction =   new QAction(QIcon(":/resources/images/play_active.svg"), tr("Run Script"), this);
+        _debugAction =  new QAction(QIcon(":/resources/images/debug_active.svg"), tr("Debug Script"), this);
+        _stopAction =   new QAction(QIcon(":/resources/images/stop_active.svg"), tr("Stop Script"), this);
+        _stepOverAction = new QAction(QIcon(":/resources/images/step_over_active.svg"), tr("Step Over"), this);
+        _continueAction = new QAction(QIcon(":/resources/images/continue_active.svg"),tr("Continue"), this);
+
+        _scriptToolBar->addAction(_playAction);
+        _scriptToolBar->addAction(_debugAction);
+        _scriptToolBar->addAction(_stopAction);
+
+        _debugToolBar->addAction(_stepOverAction);
+        _debugToolBar->addAction(_continueAction);
+
+        connectActions();
+    }
+
+    void MagiaEditorWidget::connectActions() {
+        connect(_playAction, &QAction::triggered, this, &MagiaEditorWidget::onPlayClicked);
+        connect(_debugAction, &QAction::triggered, this, &MagiaEditorWidget::onDebugClicked);
+        connect(_stopAction, &QAction::triggered, this, &MagiaEditorWidget::onStopClicked);
+        connect(_stepOverAction, &QAction::triggered, this, &MagiaEditorWidget::onStepOver);
+        connect(_continueAction, &QAction::triggered, this, &MagiaEditorWidget::onContinue);
+    }
 
     void MagiaEditorWidget::onPlayClicked() {
-        qDebug() << "Código para iniciar a execução do script";
-        QAction* action = qobject_cast<QAction*>(sender());
-        if (action) {
-            action->setIcon(QIcon(":/resources/images/play_inactive.svg"));
-        }
-
         _editor->execute();
+        updateActions();
     }
 
     void MagiaEditorWidget::onDebugClicked() {
-        qDebug() << "Código para iniciar o debugging";
-        QAction* action = qobject_cast<QAction*>(sender());
-        if (action) {
-            action->setIcon(QIcon(":/resources/images/debug_running.svg"));
-        }
         _editor->executeDebug();
+        updateActions();
     }
 
     void MagiaEditorWidget::onStopClicked() {
-        qDebug() << "Código para parar a execução ou o debugging";
         _editor->stopExecution();
+        updateActions();
     }
 
     void MagiaEditorWidget::onStepOver() {
-        qDebug() << "Código para avançar uma linha";
         _editor->stepExecution();
+        updateActions();
     }
 
     void MagiaEditorWidget::onContinue() {
-        qDebug() << "Código para continuar a execução ou o debugging";
         _editor->continueExecution();
+        updateActions();
+    }
+
+    void MagiaEditorWidget::updateActions(){
+        switch (MagiaDebugger::state) {
+            case MagiaDebugger::DebuggerState::Coding:
+                _playAction->setEnabled(true);
+                _debugAction->setEnabled(true);
+                _stopAction->setEnabled(false);
+                _stepOverAction->setEnabled(false);
+                _continueAction->setEnabled(false);
+                break;
+
+            case MagiaDebugger::DebuggerState::Running:
+                _playAction->setEnabled(false);
+                _debugAction->setEnabled(false);
+                _stopAction->setEnabled(true);
+                _stepOverAction->setEnabled(false);
+                _continueAction->setEnabled(false);
+                break;
+
+            case MagiaDebugger::DebuggerState::Step_over:
+            case MagiaDebugger::DebuggerState::Debugging:
+            case MagiaDebugger::DebuggerState::Paused:
+                _playAction->setEnabled(false);
+                _debugAction->setEnabled(false);
+                _stopAction->setEnabled(true);
+                _stepOverAction->setEnabled(true);
+                _continueAction->setEnabled(true);
+                break;
+            case MagiaDebugger::DebuggerState::Stopping:
+                _playAction->setEnabled(false);
+                _debugAction->setEnabled(false);
+                _stopAction->setEnabled(false);
+                _stepOverAction->setEnabled(false);
+                _continueAction->setEnabled(false);
+                break;
+        }
+
+        _playAction->setIcon(QIcon(MagiaDebugger::state == MagiaDebugger::DebuggerState::Coding ?
+                                   ":/resources/images/play_active.svg" :
+                                   ":/resources/images/play_inactive.svg"));
+
+        _debugAction->setIcon(QIcon(MagiaDebugger::state == MagiaDebugger::DebuggerState::Coding ?
+                                   ":/resources/images/debug_active.svg" :
+                                   ":/resources/images/debug_inactive.svg"));
+
+        _stopAction->setIcon(QIcon(MagiaDebugger::state == MagiaDebugger::DebuggerState::Coding ?
+                                   ":/resources/images/stop_inactive.svg" :
+                                   ":/resources/images/stop_active.svg"));
+
+        _stepOverAction->setIcon(QIcon(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused||
+                                       MagiaDebugger::state == MagiaDebugger::DebuggerState::Step_over ?
+                                   ":/resources/images/step_over_active.svg" :
+                                   ":/resources/images/step_over_inactive.svg"));
+
+        _continueAction->setIcon(QIcon(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused||
+                                       MagiaDebugger::state == MagiaDebugger::DebuggerState::Step_over ?
+                                   ":/resources/images/continue_active.svg" :
+                                   ":/resources/images/continue_inactive.svg"));
+
+    }
+
+    void MagiaEditorWidget::onScriptPaused() {
+        updateActions();
+    }
+
+    void MagiaEditorWidget::onScriptFinished(){
+        updateActions();
     }
 
     QWidget* MagiaEditorWidget::getCentralWidget(){
         return _centralWidget;
     }
-
-
 }

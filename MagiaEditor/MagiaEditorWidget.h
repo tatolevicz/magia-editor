@@ -23,8 +23,20 @@ namespace mg {
         void onPlayClicked();
         void onDebugClicked();
         void onStopClicked();
+        void onScriptPaused();
+        void onScriptFinished();
+
         QWidget* getCentralWidget();
     private:
+        void updateActions();
+        QAction* _playAction;
+        QAction* _debugAction;
+        QAction* _stopAction;
+        QAction* _stepOverAction;
+        QAction* _continueAction;
+
+        void setupActions();
+        void connectActions();
 
         MagiaEditor* _editor{nullptr};
         ConsoleOutput* _console{nullptr};

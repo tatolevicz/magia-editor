@@ -119,6 +119,8 @@ namespace mg{
 
                 send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
             });
+
+            emit scriptPaused();
         });
     }
 
@@ -239,6 +241,7 @@ namespace mg{
                 cb(false, err.what());
             }
         });
+
         _scriptWorker.detach();
     }
 
@@ -318,10 +321,10 @@ namespace mg{
 
             if (!varValue.empty()) {
                 QMetaObject::invokeMethod(this,
-                                          [this, pos, varValue]() {
-                                              callTipShow(pos, varValue.c_str());
-                                          },
-                                          Qt::QueuedConnection);
+                  [this, pos, varValue]() {
+                      callTipShow(pos, varValue.c_str());
+                  },
+                  Qt::QueuedConnection);
             }
 
             return;
@@ -359,63 +362,24 @@ namespace mg{
 
 
     void MagiaEditor::execute(){
-
         if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Coding)
             return;
 
-        auto length = this->textLength();
-        std::string script = this->getText(length).toStdString();
         MagiaDebugger::state = MagiaDebugger::DebuggerState::Running;
 
-        executeScript(script,[this](bool success, const std::string& msg){
-            if(!success) {
-                if(_printCallback)
-                    _printCallback(msg);
-
-                MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
-                emit scriptFinished(success, msg);
-                return;
-            }
-
-            _lua->stack_clear();
-
-            if(_printCallback)
-                _printCallback("\nScript execution ended!\n");
-
-            MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
-
-            emit scriptFinished(success, msg);
-        });
+        internalExecute();
     }
+
+
     void MagiaEditor::executeDebug(){
 
         if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Coding)
             return;
 
-        auto length = this->textLength();
-        std::string script = this->getText(length).toStdString();
         MagiaDebugger::state = MagiaDebugger::DebuggerState::Debugging;
-
-        executeScript(script,[this](bool success, const std::string& msg){
-            if(!success) {
-                if(_printCallback)
-                    _printCallback(msg);
-
-                MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
-                emit scriptFinished(success, msg);
-                return;
-            }
-
-            _lua->stack_clear();
-
-            if(_printCallback)
-                _printCallback("\nScript execution ended!\n");
-
-            MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
-
-            emit scriptFinished(success, msg);
-        });
+        internalExecute();
     }
+
     void MagiaEditor::stopExecution(){
 
         this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
@@ -448,6 +412,30 @@ namespace mg{
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Debugging;
             return;
         }
+    }
+
+    void MagiaEditor::internalExecute(){
+        auto length = this->textLength();
+        std::string script = this->getText(length).toStdString();
+        executeScript(script,[this](bool success, const std::string& msg){
+            if(!success) {
+                if(_printCallback)
+                    _printCallback(msg);
+
+                MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+                emit scriptFinished();
+                return;
+            }
+
+            _lua->stack_clear();
+
+            if(_printCallback)
+                _printCallback("\nScript execution ended!\n");
+
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+
+            emit scriptFinished();
+        });
     }
 
 

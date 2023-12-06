@@ -37,7 +37,8 @@ namespace mg {
         void continueExecution();
 
     signals:
-        void scriptFinished(bool success, const std::string& msg);
+        void scriptPaused();
+        void scriptFinished();
 
 
     protected:
@@ -60,6 +61,7 @@ namespace mg {
 //        void inputMethodEvent(QInputMethodEvent *event) override;
 //        QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
 //        void scrollContentsBy(int, int) override {}
+        void internalExecute();
 
         void syntaxTimerTimeout();
 
