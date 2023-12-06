@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/images/debug_active.svg</file>
+        <file>resources/images/debug_inactive.svg</file>
+        <file>resources/images/play_active.svg</file>
+        <file>resources/images/play_inactive.svg</file>
+        <file>resources/images/stop_active.svg</file>
+        <file>resources/images/stop_inactive.svg</file>
+        <file>resources/images/debug_running.svg</file>
+    </qresource>
+</RCC>

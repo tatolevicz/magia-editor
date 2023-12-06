@@ -27,6 +27,10 @@ public:
     ~MainWindow();
 
     void resizeEvent(QResizeEvent *event) override;
+public slots:
+    void onPlayClicked();
+    void onDebugClicked();
+    void onStopClicked();
 
 private:
     Ui::MainWindow *ui;

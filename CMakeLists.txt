@@ -9,11 +9,18 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS
+        Widgets
+        Svg
+)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
+        Widgets
+        Svg
+)
 
 
 set(PROJECT_SOURCES
+        Resources.qrc
         main.cpp
         mainwindow.cpp
         mainwindow.h
@@ -69,6 +76,7 @@ target_include_directories(TestScintillaCmake PUBLIC
 target_link_libraries(TestScintillaCmake
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Svg
     scintilla-qt-edit
     lexilla
     lua_static
