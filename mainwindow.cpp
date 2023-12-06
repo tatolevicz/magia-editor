@@ -3,16 +3,21 @@
 #include <QResizeEvent>
 #include <MagiaEditor.h>
 #include "CustomPlainTextEdit.h"
+#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    _editor = new mg::MagiaEditor(this);
+
+    QWidget* centralWidget = new QWidget(this);  // Widget central
+    QVBoxLayout* layout = new QVBoxLayout(centralWidget);  // Layout vertical
+
+    _editor = new mg::MagiaEditor(centralWidget);
     _editor->setup();
 
-    _console = new CustomPlainTextEdit(this);
+    _console = new CustomPlainTextEdit(centralWidget);
     _console->setReadOnly(true);
     _console->setMaximumHeight(100);
     _console->setStyleSheet("background-color: black; color: white; padding: 10px;");
@@ -25,15 +30,21 @@ MainWindow::MainWindow(QWidget *parent)
         });
     });
 
+    layout->addWidget(_editor);
+    layout->addWidget(_console);
+
+    setCentralWidget(centralWidget);  // Define o widget central da janela
+
+
 }
 
 //resize editor
 void MainWindow::resizeEvent(QResizeEvent *event) {
     QMainWindow::resizeEvent(event);
 
-    QSize newSize = event->size();
-    _editor->resize(newSize.width(), newSize.height() - 100);
-    _console->resize(newSize.width(), 100);
+//    QSize newSize = event->size();
+//    _editor->resize(newSize.width(), newSize.height() - 100);
+//    _console->resize(newSize.width(), 100);
 }
 
 MainWindow::~MainWindow()
