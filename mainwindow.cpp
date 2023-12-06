@@ -61,6 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(_console);
 
     setCentralWidget(centralWidget);  // Define o widget central da janela
+
+
+    connect(_editor, &mg::MagiaEditor::scriptFinished, this,
+    [](bool success, const std::string& msg){
+        qDebug() << "Script finished with success: " << success << " and message: " << msg.c_str();
+    });
 }
 
 //resize editor
@@ -78,6 +84,8 @@ void MainWindow::onPlayClicked() {
     if (action) {
         action->setIcon(QIcon(":/resources/images/play_inactive.svg"));
     }
+
+    _editor->execute();
 }
 
 void MainWindow::onDebugClicked() {

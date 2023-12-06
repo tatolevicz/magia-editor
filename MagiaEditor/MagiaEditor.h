@@ -15,11 +15,13 @@ namespace sol {
 
 namespace mg {
     using PrintCallback = std::function<void(const std::string &)>;
+    using FinishExecution = std::function<void(bool)>;
+
     class MagiaEditor : public ScintillaEdit {
     Q_OBJECT
 
     public:
-        using ScriptExecutionCallback = std::function<void(bool)>;
+        using ScriptExecutionCallback = std::function<void(bool, const std::string& msg)>;
 
         MagiaEditor(QWidget *parent = 0);
         void setup();
@@ -27,6 +29,15 @@ namespace mg {
         virtual ~MagiaEditor();
 
         void setPrintCallback(const PrintCallback& cb);
+
+        void execute();
+        void executeDebug();
+        void stopExecution();
+        void stepExecution();
+
+    signals:
+        void scriptFinished(bool success, const std::string& msg);
+
 
     protected:
 //        bool event(QEvent *event) override;
