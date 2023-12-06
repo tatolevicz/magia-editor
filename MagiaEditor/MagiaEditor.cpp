@@ -11,6 +11,8 @@
 #include <sol/sol.hpp>
 #include <QTimer>
 #include <regex>
+#include "MagiaDebugger.h"
+#include <lua.hpp>
 
 namespace mg{
     MagiaEditor::MagiaEditor(QWidget *parent):
@@ -50,14 +52,76 @@ namespace mg{
 
         //lua setup
         _lua = std::make_shared<sol::state>();
-        _lua->open_libraries(sol::lib::base);
+        _lua->open_libraries(sol::lib::base, sol::lib::math);
+
+        MagiaDebugger::setHook(_lua);
 
         // syntax timer setup
         _syntaxTimer = new QTimer(this);
         _syntaxTimer->setInterval(800); // 1000 ms = 1 segundo
         connect(_syntaxTimer, &QTimer::timeout, this, &MagiaEditor::syntaxTimerTimeout);
 
-        this->setMouseDwellTime(200);
+        this->setMouseDwellTime(500);
+
+        // Define uma função de print personalizada
+        _lua->set_function("print", [this](sol::variadic_args va, sol::this_state ts) {
+            lua_State* L = ts;  // Obter o lua_State atual
+            std::string output;
+            for (auto v : va) {
+                sol::object arg = v.get<sol::object>();
+                arg.push(L);  // Coloca o objeto no topo da pilha Lua
+                const char* str = lua_tostring(L, -1);  // Converte o objeto no topo da pilha para string
+                if (str) {
+                    output += str;
+                } else {
+                    // Obter o tipo de Lua do objeto
+                    const void* pointer = lua_topointer(L, -1);
+
+                    switch (lua_type(L, -1)) {
+                        case LUA_TTABLE:
+                            output += "table";  // Representação simplificada de uma tabela
+                            break;
+                        case LUA_TFUNCTION:
+                            output += "function";  // Representação simplificada de uma função
+                            break;
+                        case LUA_TUSERDATA:
+                            output += "userdata";  // Representação de userdata
+                            break;
+                        case LUA_TTHREAD:
+                            output += "thread";  // Representação de thread (corrotina)
+                            break;
+                        default:
+                            output += luaL_typename(L, -1);
+                            break;
+                    }
+
+                    output += " <" + std::to_string(reinterpret_cast<std::ptrdiff_t>(pointer)) + ">";
+                }
+
+                lua_pop(L, 1);  // Remove o objeto do topo da pilha
+                output += " ";
+            }
+
+            if(_printCallback)
+                _printCallback(output);
+        });
+
+
+        MagiaDebugger::setPauseCallback([this](void *L, void *ar, int line, const std::string& functionName){
+
+            _isPausedInsideFunction = functionName != "global";
+            _lua_state_on_pause = L;
+            _debug_state_on_pause = ar;
+
+            QMetaObject::invokeMethod(this, [this,line](){
+                if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused)
+                    send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED);
+
+                send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+            });
+
+            emit scriptPaused();
+        });
     }
 
     MagiaEditor::~MagiaEditor(){}
@@ -84,11 +148,28 @@ namespace mg{
     void MagiaEditor::onMarginClicked(Scintilla::Position position,
                                      Scintilla::KeyMod modifiers,
                                      int margin){
-        // Obter a linha que foi clicada
-        int lineClicked = this->send(SCI_LINEFROMPOSITION, position, 0);
-        qDebug() << "Margin clicked on line " << lineClicked;
-        // Alternar dobradura na linha
-        this->send(SCI_TOGGLEFOLD, lineClicked);
+
+        int lineClicked = send(SCI_LINEFROMPOSITION, position, 0);
+
+        if(margin == styles::Margins::FOLDING) {
+            // Obter a linha que foi clicada
+            qDebug() << "Margin clicked on line " << lineClicked;
+            // Alternar dobradura na linha
+            this->send(SCI_TOGGLEFOLD, lineClicked);
+            return;
+        }
+
+        if(margin == styles::Margins::SYMBOLS){
+            if (send(SCI_MARKERGET, lineClicked) & (1 << styles::Markers::BREAKPOINT)) {
+                send(SCI_MARKERDELETE, lineClicked, styles::Markers::BREAKPOINT);
+                send(SCI_MARKERDELETE, lineClicked, styles::Markers::BREAKPOINT_BACKGROUND);
+                MagiaDebugger::removeBreakpoint(lineClicked);
+            } else {
+                send(SCI_MARKERADD, lineClicked, styles::Markers::BREAKPOINT);
+                send(SCI_MARKERADD, lineClicked, styles::Markers::BREAKPOINT_BACKGROUND);
+                MagiaDebugger::appendBreakpoint(lineClicked);
+            }
+        }
     }
 
 
@@ -148,16 +229,20 @@ namespace mg{
         return -1; // Retorna -1 se a sintaxe estiver correta
     }
 
-    bool MagiaEditor::executeScript(const std::string& script) {
-        try {
-            _lua->script(script);
-        }
-        catch(const sol::error& err){
-            std::cerr << "Error: " << err.what();
-            return false;
-        }
+    void MagiaEditor::executeScript(const std::string& script, const ScriptExecutionCallback& cb) {
 
-        return true;
+        _scriptWorker = std::thread([this, script, cb](){
+            try {
+                _lua->script(script);
+                cb(true, "");
+            }
+            catch(const sol::error& err){
+                std::cerr << "Error: " << err.what();
+                cb(false, err.what());
+            }
+        });
+
+        _scriptWorker.detach();
     }
 
     int MagiaEditor::extractErrorLine(const std::string& errorMsg) {
@@ -181,7 +266,9 @@ namespace mg{
 
         //show error tooltip logic
         showErrorIfAny(x, line , pos);
-        showVariableValueIfAny(pos);
+
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused)
+            showVariableValueIfAny(pos);
     }
 
     void MagiaEditor::idleMouseEnd(int x, int y){
@@ -190,7 +277,8 @@ namespace mg{
 
     bool MagiaEditor::showErrorIfAny(int x, int line, int pos){
         //show error tooltip logic
-        if(x <= styles::MarginsSize::SYMBOLS) {
+        if(x >= styles::MarginsSize::NUMBERS &&
+            x <= styles::MarginsSize::NUMBERS + styles::MarginsSize::SYMBOLS ) {
             int markerMask = markerGet(line);
             int errorMask = (1 << styles::Markers::ERROR);
             if (markerMask & errorMask) {
@@ -202,7 +290,7 @@ namespace mg{
         return false;
     }
 
-    bool MagiaEditor::showVariableValueIfAny(int pos) {
+    void MagiaEditor::showVariableValueIfAny(int pos) {
 
         int startPos = wordStartPosition(pos, true);
         int endPos = wordEndPosition(pos, true);
@@ -213,17 +301,34 @@ namespace mg{
         std::string wordUnderCursor = wordArray.toStdString();
 
         if(wordUnderCursor.empty())
-            return false;
+            return;
 
-        int length = this->textLength();
-        std::string script = this->getText(length).toStdString();
-        if (validateScript(script) != -1)
-            return false; // Erro no script
+        if(_isPausedInsideFunction) {
+            auto *state = (lua_State *) _lua_state_on_pause;
+            auto *debug = (lua_Debug *) _debug_state_on_pause;
+            const char *varName;
+            int index = 1;
+            std::string varValue;
+            while ((varName = lua_getlocal(state, debug, index)) != NULL) {
+                if (strcmp(varName, wordUnderCursor.c_str()) == 0) {
+                    varValue = lua_tostring(state, -1);
+                    lua_pop(state, 1);  // Remover a variável da pilha
+                    break;
+                }
+                lua_pop(state, 1);  // Remover a variável da pilha
+                index++;
+            }
 
-        if(!executeScript(script))
-            return false;
+            if (!varValue.empty()) {
+                QMetaObject::invokeMethod(this,
+                  [this, pos, varValue]() {
+                      callTipShow(pos, varValue.c_str());
+                  },
+                  Qt::QueuedConnection);
+            }
 
-        bool output = false;
+            return;
+        }
 
         sol::object luaVar = (*_lua)[wordUnderCursor];
         if (luaVar.valid()) {
@@ -241,14 +346,97 @@ namespace mg{
                 shouldShow = true;
             }
 
-            if(shouldShow)
-                callTipShow(pos, varValue.c_str());
-
-            output = true;
+            if(shouldShow) {
+                QMetaObject::invokeMethod(this,
+                  [this, pos, varValue]() {
+                      callTipShow(pos, varValue.c_str());
+                  },
+                  Qt::QueuedConnection);
+            }
         }
-
-        _lua->stack_clear();
-        return output; // Variável não encontrada ou erro
     }
-    
+
+    void MagiaEditor::setPrintCallback(const PrintCallback &cb) {
+        _printCallback = cb;
+    }
+
+
+    void MagiaEditor::execute(){
+        if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Coding)
+            return;
+
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Running;
+
+        internalExecute();
+    }
+
+
+    void MagiaEditor::executeDebug(){
+
+        if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Coding)
+            return;
+
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Debugging;
+        internalExecute();
+    }
+
+    void MagiaEditor::stopExecution(){
+
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Coding ||
+            MagiaDebugger::state == MagiaDebugger::DebuggerState::Stopping)
+            return;
+
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Stopping;
+        _lua->stack_clear();
+        _lua->collect_garbage();
+    }
+
+    void MagiaEditor::stepExecution() {
+        if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Paused)
+            return;
+
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Step_over;
+    }
+
+    void MagiaEditor::continueExecution(){
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused){
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Debugging;
+            return;
+        }
+    }
+
+    void MagiaEditor::internalExecute(){
+        auto length = this->textLength();
+        std::string script = this->getText(length).toStdString();
+        executeScript(script,[this](bool success, const std::string& msg){
+            if(!success) {
+                if(_printCallback)
+                    _printCallback(msg);
+
+                MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+                emit scriptFinished();
+                return;
+            }
+
+            _lua->stack_clear();
+
+            if(_printCallback)
+                _printCallback("\nScript execution ended!\n");
+
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+
+            emit scriptFinished();
+        });
+    }
+
+
 }

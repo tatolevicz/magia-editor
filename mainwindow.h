@@ -2,20 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <ScintillaEdit.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 namespace mg{
-    class MagiaEditor;
+    class MagiaEditorWidget;
 }
-
-namespace sol {
-    class state;
-}
-
 
 class MainWindow : public QMainWindow
 {
@@ -25,10 +19,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void resizeEvent(QResizeEvent *event) override;
-
 private:
     Ui::MainWindow *ui;
-    mg::MagiaEditor* _editor{nullptr};
+    mg::MagiaEditorWidget* _editor{nullptr};
+
 };
 #endif // MAINWINDOW_H

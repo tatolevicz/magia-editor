@@ -8,8 +8,8 @@ namespace mg {
     namespace styles{
 
         struct Margins {
-            inline static int SYMBOLS = 0;
-            inline static int NUMBERS = 1;
+            inline static int SYMBOLS = 1;
+            inline static int NUMBERS = 0;
             inline static int FOLDING = 2;
         };
 
@@ -22,7 +22,11 @@ namespace mg {
         struct Markers {
             inline static int ERROR = 1;
             //todo continue adding
-            inline static int OTHERS = 2;
+            inline static int BREAKPOINT = 2;
+            inline static int BREAKPOINT_BACKGROUND = 3;
+            inline static int BREAKPOINT_ACHIEVED = 4;
+            inline static int BREAKPOINT_ACHIEVED_BACKGROUND = 5;
+            inline static int OTHERS = 6;
         };
 
         struct LuaEditorColors {
@@ -40,6 +44,7 @@ namespace mg {
             inline static int OPEN_STRING = 0xE7BEB4; // Strings
             inline static int OPERATOR = 0xD98E6C; // Operadores
             inline static int CONSTANT = 0xAAB362; // Constantes (nil, true, false)
+            inline static int LINE_PAUSED = 0x2D4B4B; // Breakpoint achieved
         };
 
         struct editor {
@@ -93,15 +98,30 @@ namespace mg {
 
             inline static void setupMarkers(ScintillaEdit *editor) {
 
-                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
-                editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
-                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR); // Permite o marcador de error na margem 1
-
+                //error
                 editor->markerDefine(Markers::ERROR, SC_MARK_CIRCLE);
                 editor->markerSetFore(Markers::ERROR, LuaEditorColors::ERRORS);
                 editor->markerSetBack(Markers::ERROR, LuaEditorColors::ERRORS);
 
-                editor->setMarginBackN(Margins::SYMBOLS, LuaEditorColors::BACKGROUND);
+                //breakpoint
+                editor->markerDefine(Markers::BREAKPOINT, SC_MARK_CIRCLE);
+                editor->markerSetFore(Markers::BREAKPOINT, LuaEditorColors::PRE_PROC);
+                editor->markerSetBack(Markers::BREAKPOINT, LuaEditorColors::PRE_PROC);
+
+                editor->markerDefine(Markers::BREAKPOINT_BACKGROUND, SC_MARK_BACKGROUND);
+                editor->markerSetFore(Markers::BREAKPOINT_BACKGROUND, LuaEditorColors::LINE_ACIVE);
+                editor->markerSetBack(Markers::BREAKPOINT_BACKGROUND, LuaEditorColors::LINE_ACIVE);
+
+                editor->markerDefine(Markers::BREAKPOINT_ACHIEVED, SC_MARK_CIRCLE);
+                editor->markerSetFore(Markers::BREAKPOINT_ACHIEVED, LuaEditorColors::NUMBER);
+                editor->markerSetBack(Markers::BREAKPOINT_ACHIEVED, LuaEditorColors::NUMBER);
+
+                editor->markerDefine(Markers::BREAKPOINT_ACHIEVED_BACKGROUND, SC_MARK_BACKGROUND);
+                editor->markerSetFore(Markers::BREAKPOINT_ACHIEVED_BACKGROUND, LuaEditorColors::LINE_PAUSED);
+                editor->markerSetBack(Markers::BREAKPOINT_ACHIEVED_BACKGROUND, LuaEditorColors::LINE_PAUSED);
+
+
+                editor->setMarginMaskN(Margins::SYMBOLS, 1 << Markers::ERROR | 1 << Markers::BREAKPOINT | 1 << Markers::BREAKPOINT_ACHIEVED); // Permite o marcador de error na margem 1
             }
 
 
@@ -114,6 +134,10 @@ namespace mg {
                 editor->send(SCI_SETTABWIDTH, 2);
                 editor->send(SCI_SETUSETABS, 1); // Use 1 para usar tabs reais
 
+
+                //selection
+                editor->setSelBack(true, LuaEditorColors::LINE_ACIVE);
+                editor->setSelFore(true, LuaEditorColors::IDENTIFIER);
 
                 // Habilita a visualização das guias de indentação
 //            editor->send(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
@@ -132,6 +156,10 @@ namespace mg {
                 editor->setMarginWidthN(Margins::NUMBERS, MarginsSize::NUMBERS);
                 editor->setMarginMaskN(Margins::NUMBERS, 0); // nao permite a renderizacao de marcadores na margem 1
 
+                editor->setMarginWidthN(Margins::SYMBOLS,  MarginsSize::SYMBOLS);
+                editor->setMarginTypeN(Margins::SYMBOLS, SC_MARGIN_COLOUR);
+                editor->setMarginBackN(Margins::SYMBOLS, LuaEditorColors::BACKGROUND);
+                editor->setMarginSensitiveN(Margins::SYMBOLS, true);
 
                 setupFolding(editor);
                 setupCallTips(editor);

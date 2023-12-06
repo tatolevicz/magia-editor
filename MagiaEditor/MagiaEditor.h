@@ -7,18 +7,40 @@
 
 
 #include "ScintillaEdit.h"
+#include <thread>
 
 namespace sol {
     class state;
 }
 
-namespace mg{
-    class MagiaEditor : public ScintillaEdit{
-        Q_OBJECT
+namespace mg {
+    using PrintCallback = std::function<void(const std::string &)>;
+    using FinishExecution = std::function<void(bool)>;
+
+    class MagiaEditor : public ScintillaEdit {
+    Q_OBJECT
+
     public:
+        using ScriptExecutionCallback = std::function<void(bool, const std::string& msg)>;
+
         MagiaEditor(QWidget *parent = 0);
         void setup();
+
         virtual ~MagiaEditor();
+
+        void setPrintCallback(const PrintCallback& cb);
+
+        void execute();
+        void executeDebug();
+        void stopExecution();
+        void stepExecution();
+        void continueExecution();
+
+    signals:
+        void scriptPaused();
+        void scriptFinished();
+
+
     protected:
 //        bool event(QEvent *event) override;
 //        void paintEvent(QPaintEvent *event) override;
@@ -39,10 +61,14 @@ namespace mg{
 //        void inputMethodEvent(QInputMethodEvent *event) override;
 //        QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
 //        void scrollContentsBy(int, int) override {}
+        void internalExecute();
 
         void syntaxTimerTimeout();
+
         void onCharAdded(int ch);
+
         void onNewLine();
+
         void scriptModified(Scintilla::ModificationFlags type,
                             Scintilla::Position position,
                             Scintilla::Position length,
@@ -57,22 +83,32 @@ namespace mg{
                              int margin);
 
         void idleMouseStart(int x, int y);
+
         void idleMouseEnd(int x, int y);
 
         void showAutocomplete();
-        void updateErrorMaker(int errorLine);
-        int extractErrorLine(const std::string& errorMsg);
-        int validateScript(const std::string& script);
-        bool executeScript(const std::string& script);
 
+        void updateErrorMaker(int errorLine);
+
+        int extractErrorLine(const std::string &errorMsg);
+
+        int validateScript(const std::string &script);
+
+        void executeScript(const std::string &script,const ScriptExecutionCallback& cb);
 
         bool showErrorIfAny(int x, int line, int pos);
-        bool showVariableValueIfAny(int pos);
+
+        void showVariableValueIfAny(int pos);
 
         std::shared_ptr<sol::state> _lua{nullptr};
 
-        QTimer* _syntaxTimer{nullptr};
+        QTimer *_syntaxTimer{nullptr};
         std::string _currentError;
+        std::thread _scriptWorker;
+        PrintCallback _printCallback{nullptr};
+        void *_lua_state_on_pause{nullptr};
+        void *_debug_state_on_pause{nullptr};
+        bool _isPausedInsideFunction{false};
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H
