@@ -14,6 +14,7 @@ namespace sol {
 }
 
 namespace mg {
+    using PrintCallback = std::function<void(const std::string &)>;
     class MagiaEditor : public ScintillaEdit {
     Q_OBJECT
 
@@ -24,6 +25,8 @@ namespace mg {
         void setup();
 
         virtual ~MagiaEditor();
+
+        void setPrintCallback(const PrintCallback& cb);
 
     protected:
 //        bool event(QEvent *event) override;
@@ -88,6 +91,7 @@ namespace mg {
         QTimer *_syntaxTimer{nullptr};
         std::string _currentError;
         std::thread _scriptWorker;
+        PrintCallback _printCallback{nullptr};
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H

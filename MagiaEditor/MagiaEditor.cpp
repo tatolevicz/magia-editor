@@ -63,7 +63,7 @@ namespace mg{
         this->setMouseDwellTime(500);
 
         // Define uma função de print personalizada
-        _lua->set_function("print", [](sol::variadic_args va, sol::this_state ts) {
+        _lua->set_function("print", [this](sol::variadic_args va, sol::this_state ts) {
             lua_State* L = ts;  // Obter o lua_State atual
             std::string output;
             for (auto v : va) {
@@ -100,7 +100,9 @@ namespace mg{
                 lua_pop(L, 1);  // Remove o objeto do topo da pilha
                 output += " ";
             }
-            std::cout << output << std::endl;
+
+            if(_printCallback)
+                _printCallback(output);
         });
 
     }
@@ -318,6 +320,9 @@ namespace mg{
         });
     }
 
+    void MagiaEditor::setPrintCallback(const PrintCallback &cb) {
+        _printCallback = cb;
+    }
 
 
 }
