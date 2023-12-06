@@ -14,7 +14,7 @@ namespace mg{
         lua_getinfo(L, "nSl", ar);
         int currentLine = ar->currentline;
         std::string currentFunction = ar->name ? ar->name : "global";
-        std::cout << "Current Line: " << currentLine << std::endl;
+//        std::cout << "Current Line: " << currentLine << std::endl;
 //        std::cout << "Current function: " << currentFunction << std::endl;
 
         if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Step_over){
@@ -41,7 +41,6 @@ namespace mg{
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-
         if (MagiaDebugger::state == MagiaDebugger::DebuggerState::Stopping) {
             luaL_error(L, "Script interrupted!");
         }
@@ -49,6 +48,7 @@ namespace mg{
 
     void MagiaDebugger::setHook(const std::shared_ptr<sol::state>& sol){
         lua_sethook(sol->lua_state(),luaDebugHook, LUA_MASKLINE, 0);
+//        lua_sethook(sol->lua_state(), luaDebugHook, LUA_MASKLINE | LUA_MASKCALL | LUA_MASKRET, 0);
     }
 
     void MagiaDebugger::appendBreakpoint(int line){
