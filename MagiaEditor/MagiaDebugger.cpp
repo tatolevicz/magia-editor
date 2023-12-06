@@ -6,19 +6,26 @@
 #include <lua.hpp>
 #include <iostream>
 #include <sol/sol.hpp>
+#include <thread>
 
 namespace mg{
 
     void luaDebugHook(lua_State *L, lua_Debug *ar) {
         lua_getinfo(L, "nSl", ar);
         int currentLine = ar->currentline;
-        std::string currentFunction = ar->name ? ar->name : "unknown";
+//        std::string currentFunction = ar->name ? ar->name : "unknown";
         std::cout << "Current Line: " << currentLine << std::endl;
-        std::cout << "Current function: " << currentFunction << std::endl;
+//        std::cout << "Current function: " << currentFunction << std::endl;
 
         bool isBreakPoint = MagiaDebugger::breakpoints.find(ar->currentline) != MagiaDebugger::breakpoints.end();
-        while(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Running) {
-            std::cout << "waiting!" << std::endl;
+
+        if(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Step){
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Paused;
+        }
+
+        while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            //todo highlight current line
         }
     }
 

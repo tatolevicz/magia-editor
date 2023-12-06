@@ -223,7 +223,6 @@ namespace mg{
                 std::cerr << "Error: " << err.what();
                 cb(false, err.what());
             }
-
         });
         _scriptWorker.detach();
     }
@@ -330,7 +329,13 @@ namespace mg{
 
 
     void MagiaEditor::execute(){
-        int length = this->textLength();
+
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused){
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Step;
+            return;
+        }
+
+        auto length = this->textLength();
         std::string script = this->getText(length).toStdString();
         MagiaDebugger::state = MagiaDebugger::DebuggerState::Running;
 
@@ -351,7 +356,25 @@ namespace mg{
         });
     }
     void MagiaEditor::executeDebug(){
+        auto length = this->textLength();
+        std::string script = this->getText(length).toStdString();
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Step;
 
+        executeScript(script,[this](bool success, const std::string& msg){
+            if(!success) {
+                if(_printCallback)
+                    _printCallback(msg);
+
+                MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+                emit scriptFinished(success, msg);
+                return;
+            }
+
+            _lua->stack_clear();
+            std::cout << "Script execution ended!\n";
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+            emit scriptFinished(success, msg);
+        });
     }
     void MagiaEditor::stopExecution(){
 

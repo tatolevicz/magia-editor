@@ -94,6 +94,7 @@ void MainWindow::onDebugClicked() {
     if (action) {
         action->setIcon(QIcon(":/resources/images/debug_running.svg"));
     }
+    _editor->executeDebug();
 }
 
 void MainWindow::onStopClicked() {
