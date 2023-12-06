@@ -20,8 +20,10 @@ namespace mg{
         enum class DebuggerState {
             Coding,
             Running,
+            Debugging,
             Paused,
-            Step
+            Step_over,
+            Stopping,
         };
 
         inline static std::unordered_set<int> breakpoints;

@@ -357,13 +357,9 @@ namespace mg{
 
 
     void MagiaEditor::execute(){
-        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
-        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
 
-        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused){
-            MagiaDebugger::state = MagiaDebugger::DebuggerState::Step;
+        if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Coding)
             return;
-        }
 
         auto length = this->textLength();
         std::string script = this->getText(length).toStdString();
@@ -390,9 +386,13 @@ namespace mg{
         });
     }
     void MagiaEditor::executeDebug(){
+
+        if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Coding)
+            return;
+
         auto length = this->textLength();
         std::string script = this->getText(length).toStdString();
-        MagiaDebugger::state = MagiaDebugger::DebuggerState::Step;
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Debugging;
 
         executeScript(script,[this](bool success, const std::string& msg){
             if(!success) {
@@ -416,9 +416,30 @@ namespace mg{
     }
     void MagiaEditor::stopExecution(){
 
-    }
-    void MagiaEditor::stepExecution(){
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
 
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Coding ||
+            MagiaDebugger::state == MagiaDebugger::DebuggerState::Stopping)
+            return;
+
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Stopping;
+        _lua->stack_clear();
+        _lua->collect_garbage();
+    }
+
+    void MagiaEditor::stepExecution() {
+
+    }
+
+    void MagiaEditor::continueExecution(){
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused){
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Debugging;
+            return;
+        }
     }
 
 

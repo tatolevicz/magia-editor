@@ -28,6 +28,8 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 public slots:
+    void onStepOver();
+    void onContinue();
     void onPlayClicked();
     void onDebugClicked();
     void onStopClicked();

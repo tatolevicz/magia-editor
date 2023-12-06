@@ -56,9 +56,37 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playAction, &QAction::triggered, this, &MainWindow::onPlayClicked);
     connect(debugAction, &QAction::triggered, this, &MainWindow::onDebugClicked);
     connect(stopAction, &QAction::triggered, this, &MainWindow::onStopClicked);
+    
 
     layout->addWidget(_editor);
-    layout->addWidget(_console);
+
+    QWidget* bottomWidget = new QWidget(this);
+    bottomWidget->setMaximumHeight(150);
+    QHBoxLayout* bottomLayout = new QHBoxLayout(bottomWidget);
+    bottomWidget->setLayout(bottomLayout);
+    bottomLayout->setContentsMargins(0, 0, 0, 0);
+    bottomLayout->setSpacing(0);
+
+    //debug toolbar
+    QToolBar* debugToolBar = new QToolBar("Debug Bar", this);
+    debugToolBar->setOrientation(Qt::Vertical);
+    debugToolBar->setStyleSheet("background-color: #24283B;  border-right: 1px solid #24283B;");
+    debugToolBar->setIconSize(QSize(14, 14));  // Define o tamanho dos ícones
+    debugToolBar->setMovable(false);  // Torna a barra de ferramentas não-movível
+    addToolBar(Qt::LeftToolBarArea, debugToolBar);
+
+    QAction* stepOverAction = new QAction(QIcon(":/resources/images/step_over_active.svg"), "Step Over", this);
+    debugToolBar->addAction(stepOverAction);
+    connect(stepOverAction, &QAction::triggered, this, &MainWindow::onStepOver);
+
+    QAction* stepIntoAction = new QAction(QIcon(":/resources/images/continue_active.svg"), "Step Into", this);
+    debugToolBar->addAction(stepIntoAction);
+    connect(stepIntoAction, &QAction::triggered, this, &MainWindow::onContinue);
+
+    bottomLayout->addWidget(debugToolBar);
+    bottomLayout->addWidget(_console);
+
+    layout->addWidget(bottomWidget);
 
     setCentralWidget(centralWidget);  // Define o widget central da janela
 
@@ -99,6 +127,16 @@ void MainWindow::onDebugClicked() {
 
 void MainWindow::onStopClicked() {
     qDebug() << "Código para parar a execução ou o debugging";
+    _editor->stopExecution();
+}
+
+void MainWindow::onStepOver() {
+    qDebug() << "Código para avançar uma linha";
+}
+
+void MainWindow::onContinue() {
+    qDebug() << "Código para continuar a execução ou o debugging";
+    _editor->continueExecution();
 }
 
 MainWindow::~MainWindow()

@@ -19,14 +19,18 @@ namespace mg{
 
         bool isBreakPoint = MagiaDebugger::breakpoints.find(ar->currentline) != MagiaDebugger::breakpoints.end();
 
-        if(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Step){
+        if(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Debugging){
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Paused;
             if(MagiaDebugger::pauseCallback)
                 MagiaDebugger::pauseCallback(L, ar, currentLine - 1, currentFunction);
         }
 
-        while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused) {
+        while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused && MagiaDebugger::state != MagiaDebugger::DebuggerState::Stopping) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        if (MagiaDebugger::state == MagiaDebugger::DebuggerState::Stopping) {
+            luaL_error(L, "Script interrupted!");
         }
     }
 

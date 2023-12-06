@@ -34,6 +34,7 @@ namespace mg {
         void executeDebug();
         void stopExecution();
         void stepExecution();
+        void continueExecution();
 
     signals:
         void scriptFinished(bool success, const std::string& msg);
