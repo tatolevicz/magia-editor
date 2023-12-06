@@ -60,7 +60,49 @@ namespace mg{
         _syntaxTimer->setInterval(800); // 1000 ms = 1 segundo
         connect(_syntaxTimer, &QTimer::timeout, this, &MagiaEditor::syntaxTimerTimeout);
 
-        this->setMouseDwellTime(200);
+        this->setMouseDwellTime(500);
+
+        // Define uma função de print personalizada
+        _lua->set_function("print", [](sol::variadic_args va, sol::this_state ts) {
+            lua_State* L = ts;  // Obter o lua_State atual
+            std::string output;
+            for (auto v : va) {
+                sol::object arg = v.get<sol::object>();
+                arg.push(L);  // Coloca o objeto no topo da pilha Lua
+                const char* str = lua_tostring(L, -1);  // Converte o objeto no topo da pilha para string
+                if (str) {
+                    output += str;
+                } else {
+                    // Obter o tipo de Lua do objeto
+                    const void* pointer = lua_topointer(L, -1);
+
+                    switch (lua_type(L, -1)) {
+                        case LUA_TTABLE:
+                            output += "table";  // Representação simplificada de uma tabela
+                            break;
+                        case LUA_TFUNCTION:
+                            output += "function";  // Representação simplificada de uma função
+                            break;
+                        case LUA_TUSERDATA:
+                            output += "userdata";  // Representação de userdata
+                            break;
+                        case LUA_TTHREAD:
+                            output += "thread";  // Representação de thread (corrotina)
+                            break;
+                        default:
+                            output += luaL_typename(L, -1);
+                            break;
+                    }
+
+                    output += " <" + std::to_string(reinterpret_cast<std::ptrdiff_t>(pointer)) + ">";
+                }
+
+                lua_pop(L, 1);  // Remove o objeto do topo da pilha
+                output += " ";
+            }
+            std::cout << output << std::endl;
+        });
+
     }
 
     MagiaEditor::~MagiaEditor(){}

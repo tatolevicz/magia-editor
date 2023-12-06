@@ -17,6 +17,7 @@ namespace mg{
     class MagiaDebugger {
     public:
         enum class DebuggerState {
+            Coding,
             Running,
             Paused,
             Step
@@ -26,7 +27,7 @@ namespace mg{
         static void setHook(const std::shared_ptr<sol::state>& sol);
         static void appendBreakpoint(int line);
         static void removeBreakpoint(int line);
-        inline static DebuggerState state = DebuggerState::Running;
+        inline static DebuggerState state = DebuggerState::Coding;
 
     private:
 
