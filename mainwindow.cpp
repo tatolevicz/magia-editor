@@ -21,11 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     _console = new CustomPlainTextEdit(centralWidget);
     _console->setReadOnly(true);
-    _console->setMaximumHeight(100);
+    _console->setMaximumHeight(150);
     _console->setStyleSheet("background-color: black; color: white; padding: 10px;");
     _console->setFont(QFont("Courier New", 16));
 //    _console->resize(this->width(), 100);
-    _console->move(0, this->height() - 100);
+    _console->move(0, this->height() - 150);
     _editor->setPrintCallback([this](const std::string& print){
         QMetaObject::invokeMethod(this, [this, print](){
             _console->appendPlainText(print.c_str());

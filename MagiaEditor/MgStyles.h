@@ -8,8 +8,8 @@ namespace mg {
     namespace styles{
 
         struct Margins {
-            inline static int SYMBOLS = 0;
-            inline static int NUMBERS = 1;
+            inline static int SYMBOLS = 1;
+            inline static int NUMBERS = 0;
             inline static int FOLDING = 2;
         };
 

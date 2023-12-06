@@ -14,7 +14,7 @@ namespace mg{
         lua_getinfo(L, "nSl", ar);
         int currentLine = ar->currentline;
         std::string currentFunction = ar->name ? ar->name : "global";
-        std::cout << "Current Line: " << currentLine << std::endl;
+//        std::cout << "Current Line: " << currentLine << std::endl;
 //        std::cout << "Current function: " << currentFunction << std::endl;
 
         bool isBreakPoint = MagiaDebugger::breakpoints.find(ar->currentline) != MagiaDebugger::breakpoints.end();

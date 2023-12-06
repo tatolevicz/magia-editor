@@ -291,7 +291,8 @@ namespace mg{
 
     bool MagiaEditor::showErrorIfAny(int x, int line, int pos){
         //show error tooltip logic
-        if(x <= styles::MarginsSize::SYMBOLS) {
+        if(x >= styles::MarginsSize::NUMBERS &&
+            x <= styles::MarginsSize::NUMBERS + styles::MarginsSize::SYMBOLS ) {
             int markerMask = markerGet(line);
             int errorMask = (1 << styles::Markers::ERROR);
             if (markerMask & errorMask) {
@@ -436,8 +437,12 @@ namespace mg{
             }
 
             _lua->stack_clear();
-            std::cout << "Script execution ended!\n";
+
+            if(_printCallback)
+                _printCallback("\nScript execution ended!\n");
+
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+
             emit scriptFinished(success, msg);
         });
     }
@@ -457,8 +462,12 @@ namespace mg{
             }
 
             _lua->stack_clear();
-            std::cout << "Script execution ended!\n";
+
+            if(_printCallback)
+                _printCallback("\nScript execution ended!\n");
+
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
+
             emit scriptFinished(success, msg);
         });
     }
