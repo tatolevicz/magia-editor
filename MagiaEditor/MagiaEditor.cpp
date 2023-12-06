@@ -117,25 +117,6 @@ namespace mg{
                 send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED);
                 send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
             });
-
-//            auto *state = (lua_State *)L;
-//            auto *debug = (lua_Debug *)ar;
-//            const char* varName;
-//            int index = 1;
-//            while ((varName = lua_getlocal(state, debug, index)) != NULL) {
-//                if (strcmp(varName, "a") == 0) {
-//                    // A variável foi encontrada, faça algo com ela
-//                    if (lua_isnumber(state, -1)) {
-//                        double valor = lua_tonumber(state, -1);
-//                        // Use o valor...
-//                    }
-//                    lua_pop(state, 1);  // Remover a variável da pilha
-//                    break;
-//                }
-//                lua_pop(state, 1);  // Remover a variável da pilha
-//                index++;
-//            }
-
         });
     }
 
@@ -368,44 +349,6 @@ namespace mg{
                   Qt::QueuedConnection);
             }
         }
-
-//        int length = this->textLength();
-//        std::string script = this->getText(length).toStdString();
-//        if (validateScript(script) != -1)
-//            return; // Erro no script
-//
-//        executeScript(script,[this, wordUnderCursor, pos](bool success){
-//            if(!success)
-//                return;
-//
-//            sol::object luaVar = (*_lua)[wordUnderCursor];
-//            if (luaVar.valid()) {
-//                bool shouldShow = false;
-//                std::string varValue;
-//                if (luaVar.get_type() == sol::type::string) {
-//                    varValue = luaVar.as<std::string>();
-//                    shouldShow = true;
-//                } else if (luaVar.get_type() == sol::type::number) {
-//                    varValue = std::to_string(luaVar.as<double>());
-//                    shouldShow = true;
-//                }
-//                else if (luaVar.get_type() == sol::type::boolean) {
-//                    varValue = std::to_string(luaVar.as<bool>());
-//                    shouldShow = true;
-//                }
-//
-//                if(shouldShow) {
-//                    QMetaObject::invokeMethod(this,
-//                        [this, pos, varValue]() {
-//                          callTipShow(pos, varValue.c_str());
-//                        },
-//                        Qt::QueuedConnection);
-//                }
-//            }
-//
-//            _lua->stack_clear();
-//            std::cout << "Script execution ended!\n";
-//        });
     }
 
     void MagiaEditor::setPrintCallback(const PrintCallback &cb) {
