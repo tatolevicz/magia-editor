@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
     _editor = new mg::MagiaEditorWidget(this);
     setCentralWidget(_editor->getCentralWidget());
 }
