@@ -14,8 +14,19 @@ namespace mg{
         lua_getinfo(L, "nSl", ar);
         int currentLine = ar->currentline;
         std::string currentFunction = ar->name ? ar->name : "global";
-//        std::cout << "Current Line: " << currentLine << std::endl;
+        std::cout << "Current Line: " << currentLine << std::endl;
 //        std::cout << "Current function: " << currentFunction << std::endl;
+
+        if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Step_over){
+            MagiaDebugger::state = MagiaDebugger::DebuggerState::Paused;
+            if(MagiaDebugger::pauseCallback)
+                MagiaDebugger::pauseCallback(L, ar, currentLine - 1, currentFunction);
+        }
+
+        while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused &&
+                MagiaDebugger::state != MagiaDebugger::DebuggerState::Stopping) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
 
         bool isBreakPoint = MagiaDebugger::breakpoints.find(ar->currentline) != MagiaDebugger::breakpoints.end();
 
@@ -25,9 +36,11 @@ namespace mg{
                 MagiaDebugger::pauseCallback(L, ar, currentLine - 1, currentFunction);
         }
 
-        while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused && MagiaDebugger::state != MagiaDebugger::DebuggerState::Stopping) {
+        while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused &&
+              MagiaDebugger::state != MagiaDebugger::DebuggerState::Stopping) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+
 
         if (MagiaDebugger::state == MagiaDebugger::DebuggerState::Stopping) {
             luaL_error(L, "Script interrupted!");

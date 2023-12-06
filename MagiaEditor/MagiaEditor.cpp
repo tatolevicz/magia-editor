@@ -114,7 +114,9 @@ namespace mg{
             _debug_state_on_pause = ar;
 
             QMetaObject::invokeMethod(this, [this,line](){
-                send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED);
+                if(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused)
+                    send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED);
+
                 send(SCI_MARKERADD, line, styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
             });
         });
@@ -429,7 +431,13 @@ namespace mg{
     }
 
     void MagiaEditor::stepExecution() {
+        if(MagiaDebugger::state != MagiaDebugger::DebuggerState::Paused)
+            return;
 
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED);
+        this->markerDeleteAll(styles::Markers::BREAKPOINT_ACHIEVED_BACKGROUND);
+
+        MagiaDebugger::state = MagiaDebugger::DebuggerState::Step_over;
     }
 
     void MagiaEditor::continueExecution(){

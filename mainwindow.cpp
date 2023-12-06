@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playAction, &QAction::triggered, this, &MainWindow::onPlayClicked);
     connect(debugAction, &QAction::triggered, this, &MainWindow::onDebugClicked);
     connect(stopAction, &QAction::triggered, this, &MainWindow::onStopClicked);
-    
+
 
     layout->addWidget(_editor);
 
@@ -132,6 +132,7 @@ void MainWindow::onStopClicked() {
 
 void MainWindow::onStepOver() {
     qDebug() << "Código para avançar uma linha";
+    _editor->stepExecution();
 }
 
 void MainWindow::onContinue() {
