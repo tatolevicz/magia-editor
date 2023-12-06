@@ -105,6 +105,7 @@ namespace mg {
         PrintCallback _printCallback{nullptr};
         void *_lua_state_on_pause{nullptr};
         void *_debug_state_on_pause{nullptr};
+        bool _isPausedInsideFunction{false};
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H

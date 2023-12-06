@@ -107,8 +107,9 @@ namespace mg{
         });
 
 
-        MagiaDebugger::setPauseCallback([this](void *L, void *ar){
+        MagiaDebugger::setPauseCallback([this](void *L, void *ar, const std::string& functionName){
 
+            _isPausedInsideFunction = functionName != "global";
             _lua_state_on_pause = L;
             _debug_state_on_pause = ar;
 
@@ -310,27 +311,56 @@ namespace mg{
         if(wordUnderCursor.empty())
             return;
 
-        auto *state = (lua_State *)_lua_state_on_pause;
-        auto *debug = (lua_Debug *)_debug_state_on_pause;
-        const char* varName;
-        int index = 1;
-        std::string varValue;
-        while ((varName = lua_getlocal(state, debug, index)) != NULL) {
-            if (strcmp(varName, wordUnderCursor.c_str()) == 0) {
-                varValue = lua_tostring(state, -1);
+        if(_isPausedInsideFunction) {
+            auto *state = (lua_State *) _lua_state_on_pause;
+            auto *debug = (lua_Debug *) _debug_state_on_pause;
+            const char *varName;
+            int index = 1;
+            std::string varValue;
+            while ((varName = lua_getlocal(state, debug, index)) != NULL) {
+                if (strcmp(varName, wordUnderCursor.c_str()) == 0) {
+                    varValue = lua_tostring(state, -1);
+                    lua_pop(state, 1);  // Remover a variável da pilha
+                    break;
+                }
                 lua_pop(state, 1);  // Remover a variável da pilha
-                break;
+                index++;
             }
-            lua_pop(state, 1);  // Remover a variável da pilha
-            index++;
+
+            if (!varValue.empty()) {
+                QMetaObject::invokeMethod(this,
+                                          [this, pos, varValue]() {
+                                              callTipShow(pos, varValue.c_str());
+                                          },
+                                          Qt::QueuedConnection);
+            }
+
+            return;
         }
 
-        if(!varValue.empty()){
-            QMetaObject::invokeMethod(this,
-            [this, pos, varValue]() {
-              callTipShow(pos, varValue.c_str());
-            },
-            Qt::QueuedConnection);
+        sol::object luaVar = (*_lua)[wordUnderCursor];
+        if (luaVar.valid()) {
+            bool shouldShow = false;
+            std::string varValue;
+            if (luaVar.get_type() == sol::type::string) {
+                varValue = luaVar.as<std::string>();
+                shouldShow = true;
+            } else if (luaVar.get_type() == sol::type::number) {
+                varValue = std::to_string(luaVar.as<double>());
+                shouldShow = true;
+            }
+            else if (luaVar.get_type() == sol::type::boolean) {
+                varValue = std::to_string(luaVar.as<bool>());
+                shouldShow = true;
+            }
+
+            if(shouldShow) {
+                QMetaObject::invokeMethod(this,
+                  [this, pos, varValue]() {
+                      callTipShow(pos, varValue.c_str());
+                  },
+                  Qt::QueuedConnection);
+            }
         }
 
 //        int length = this->textLength();

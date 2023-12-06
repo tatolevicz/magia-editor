@@ -13,7 +13,7 @@ namespace mg{
     void luaDebugHook(lua_State *L, lua_Debug *ar) {
         lua_getinfo(L, "nSl", ar);
         int currentLine = ar->currentline;
-//        std::string currentFunction = ar->name ? ar->name : "unknown";
+        std::string currentFunction = ar->name ? ar->name : "global";
         std::cout << "Current Line: " << currentLine << std::endl;
 //        std::cout << "Current function: " << currentFunction << std::endl;
 
@@ -22,7 +22,7 @@ namespace mg{
         if(isBreakPoint && MagiaDebugger::state == MagiaDebugger::DebuggerState::Step){
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Paused;
             if(MagiaDebugger::pauseCallback)
-                MagiaDebugger::pauseCallback(L, ar);
+                MagiaDebugger::pauseCallback(L, ar, currentFunction);
         }
 
         while(MagiaDebugger::state == MagiaDebugger::DebuggerState::Paused) {

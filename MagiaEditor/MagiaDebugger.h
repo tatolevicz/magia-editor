@@ -16,7 +16,7 @@ namespace mg{
 
     class MagiaDebugger {
     public:
-        using PauseCallback = std::function<void(void* L, void* ar)>;
+        using PauseCallback = std::function<void(void* L, void* ar,  const std::string& functionName)>;
         enum class DebuggerState {
             Coding,
             Running,
