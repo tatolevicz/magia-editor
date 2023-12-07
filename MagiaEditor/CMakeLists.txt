@@ -1,18 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-
-project(MagiaEditor VERSION 0.1 LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS
-        Widgets
-        Svg
-        )
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
-        Widgets
-        Svg
-        )
+project(mg_editor VERSION 0.1 LANGUAGES CXX)
 
 set(PROJECT_INCLUDES
         include/MgStyles.h
@@ -29,7 +15,7 @@ set(PROJECT_SOURCES
         src/ConsoleOutput.cpp
         )
 
-add_library(MagiaEditor ${PROJECT_INCLUDES} ${PROJECT_SOURCES} )
+add_library(${PROJECT_NAME} ${PROJECT_INCLUDES} ${PROJECT_SOURCES} )
 
 add_subdirectory(external/scintilla)
 add_subdirectory(external/lua)
@@ -44,9 +30,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Svg
+    PRIVATE
     scintilla-qt-edit
     lexzilla
     lua_static
