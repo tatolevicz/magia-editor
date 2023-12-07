@@ -11,6 +11,12 @@
 #include "ConsoleOutput.h"
 
 namespace mg{
+
+    void MagiaEditorWidget::resizeEvent(QResizeEvent *event){
+        QWidget::resizeEvent(event);
+        _centralWidget->resize(event->size());
+    }
+
     MagiaEditorWidget::MagiaEditorWidget(QWidget *parent) : QWidget(parent) {
 
         _centralWidget = new QWidget(this);  // Widget central

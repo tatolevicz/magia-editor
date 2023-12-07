@@ -17,6 +17,8 @@ namespace mg {
         Q_OBJECT
     public:
         MagiaEditorWidget(QWidget* parent = nullptr);
+        void resizeEvent(QResizeEvent *event) override;
+
     public slots:
         void onStepOver();
         void onContinue();
