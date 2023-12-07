@@ -52,7 +52,7 @@ namespace mg{
 
         //lua setup
         _lua = std::make_shared<sol::state>();
-        _lua->open_libraries(sol::lib::base, sol::lib::math);
+        _lua->open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
 
         MagiaDebugger::setHook(_lua);
 
