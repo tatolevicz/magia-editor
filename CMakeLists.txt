@@ -78,7 +78,7 @@ target_link_libraries(TestScintillaCmake
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
     scintilla-qt-edit
-    lexilla
+    lexzilla
     lua_static
     sol2
 )
