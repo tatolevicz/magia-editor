@@ -3,7 +3,7 @@
 //
 
 #include "MagiaDebugger.h"
-#include <lua.hpp>
+#include "lua.hpp"
 #include <iostream>
 #include <sol/sol.hpp>
 #include <thread>

@@ -1,16 +1,10 @@
 #include "mainwindow.h"
 
 #include <QApplication>
-#include <QFontDatabase>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    QFontDatabase::addApplicationFont(":/resources/fonts/Courier-New.ttf");
-    QFontDatabase::addApplicationFont(":/resources/fonts/Courier-New-Bold.ttf");
-    QFontDatabase::addApplicationFont(":/resources/fonts/Poppins-ExtraBold.ttf");
-    QFontDatabase::addApplicationFont(":/resources/fonts/Poppins-Regular.ttf");
 
     MainWindow w;
     w.show();

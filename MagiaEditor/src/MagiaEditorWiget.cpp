@@ -3,8 +3,8 @@
 //
 
 #include "MagiaEditorWidget.h"
-#include <MagiaEditor.h>
-#include <MagiaDebugger.h>
+#include "MagiaEditor.h"
+#include "MagiaDebugger.h"
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QVBoxLayout>

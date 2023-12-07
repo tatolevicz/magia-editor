@@ -5,14 +5,14 @@
 #include "MagiaEditor.h"
 #include "MgStyles.h"
 
-#include <SciLexer.h>
-#include <ILexer.h>
-#include <Lexilla.h>
+#include "SciLexer.h"
+#include "ILexer.h"
+#include "Lexilla.h"
 #include <sol/sol.hpp>
 #include <QTimer>
 #include <regex>
 #include "MagiaDebugger.h"
-#include <lua.hpp>
+#include "lua.hpp"
 
 namespace mg{
     MagiaEditor::MagiaEditor(QWidget *parent):

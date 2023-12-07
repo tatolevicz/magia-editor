@@ -3,6 +3,7 @@
 
 #include "ScintillaEdit.h"
 #include "SciLexer.h"
+#include <QFontDatabase>
 
 namespace mg {
     namespace styles{
@@ -170,6 +171,9 @@ namespace mg {
 
         struct lua {
             inline static void setDefaultStyle(ScintillaEdit *editor) {
+
+                QFontDatabase::addApplicationFont(":/resources/fonts/Courier-New.ttf");
+                QFontDatabase::addApplicationFont(":/resources/fonts/Courier-New-Bold.ttf");
 
                 editor->styleSetFore(SCE_LUA_DEFAULT, LuaEditorColors::IDENTIFIER);
                 editor->styleSetBold(SCE_LUA_DEFAULT, false);

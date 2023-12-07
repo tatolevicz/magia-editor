@@ -18,36 +18,24 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Svg
 )
 
-
 set(PROJECT_SOURCES
-        Resources.qrc
+        MagiaEditor/EditorRes.qrc # Dont forget to add this to see the icons on editor
         main.cpp
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        MagiaEditor/MgStyles.h
-        MagiaEditor/MagiaEditor.cpp
-        MagiaEditor/MagiaEditor.h
-        MagiaEditor/MagiaDebugger.cpp
-        MagiaEditor/MagiaDebugger.h
-        MagiaEditor/ConsoleOutput.h MagiaEditor/MagiaEditorWiget.cpp MagiaEditor/MagiaEditorWidget.h MagiaEditor/ConsoleOutput.cpp)
+)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(TestScintillaCmake
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET TestScintillaCmake APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
         add_library(TestScintillaCmake SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(TestScintillaCmake
             ${PROJECT_SOURCES}
@@ -55,32 +43,17 @@ else()
     endif()
 endif()
 
-
-add_subdirectory(external/scintilla)
-add_subdirectory(external/lua)
-add_subdirectory(external/sol2)
-add_subdirectory(external/lexilla)
+add_subdirectory(MagiaEditor)
 
 target_include_directories(TestScintillaCmake PUBLIC
-    external/lexilla/include
-    external/lexilla/access
-    external/Lua/lua-5.4.6/include
-    MagiaEditor
+    MagiaEditor/include
 )
 
-# Adicione o caminho da biblioteca estática
-#add_library(lexilla STATIC IMPORTED)
-#set_target_properties(lexilla PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/external/lexilla/bin/liblexzilla.a")
-
-
 target_link_libraries(TestScintillaCmake
-    PRIVATE
+    PUBLIC
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
-    scintilla-qt-edit
-    lexzilla
-    lua_static
-    sol2
+    MagiaEditor
 )
 
 set_target_properties(TestScintillaCmake PROPERTIES
