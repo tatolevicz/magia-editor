@@ -26,11 +26,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     external/lexilla/include
     external/lexilla/access
     external/Lua/lua-5.4.6/include
+    external/sol2/include
     include
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE
+    PUBLIC
     scintilla-qt-edit
     lexzilla
     lua_static
