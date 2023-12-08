@@ -390,8 +390,7 @@ namespace mg{
             return;
 
         MagiaDebugger::state = MagiaDebugger::DebuggerState::Stopping;
-        _lua->stack_clear();
-        _lua->collect_garbage();
+        internalClean();
     }
 
     void MagiaEditor::stepExecution() {
@@ -428,7 +427,7 @@ namespace mg{
                 return;
             }
 
-            _lua->stack_clear();
+            internalClean();
 
             if(_printCallback)
                 _printCallback("\nScript execution ended!\n");
@@ -439,5 +438,12 @@ namespace mg{
         });
     }
 
+    void MagiaEditor::internalClean(){
+        _lua->stack_clear();
+        _lua->collect_garbage();
+    }
 
+    std::shared_ptr<sol::state> MagiaEditor::getLuaState(){
+        return _lua;
+    }
 }

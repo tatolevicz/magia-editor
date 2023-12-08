@@ -8,6 +8,9 @@
 #include <QWidget>
 
 class QToolBar;
+namespace sol{
+    class state;
+}
 
 namespace mg {
     class MagiaEditor;
@@ -19,17 +22,24 @@ namespace mg {
         MagiaEditorWidget(QWidget* parent = nullptr);
         void resizeEvent(QResizeEvent *event) override;
 
-    public slots:
-        void onStepOver();
-        void onContinue();
-        void onPlayClicked();
-        void onDebugClicked();
-        void onStopClicked();
-        void onScriptPaused();
-        void onScriptFinished();
-        void onScriptStarted();
-
         QWidget* getCentralWidget();
+        std::shared_ptr<sol::state> getLuaState();
+
+    public slots:
+        virtual void onStepOver();
+        virtual void onContinue();
+        virtual void onPlayClicked();
+        virtual void onDebugClicked();
+        virtual void onStopClicked();
+        virtual void onScriptPaused();
+        virtual void onScriptFinished();
+        virtual void onScriptStarted();
+
+    signals:
+        void scriptStart();
+        void scriptPause();
+        void scriptFinish();
+
     private:
         void updateActions();
         QAction* _playAction;

@@ -35,7 +35,7 @@ namespace mg {
         void stopExecution();
         void stepExecution();
         void continueExecution();
-
+        std::shared_ptr<sol::state> getLuaState();
     signals:
         void scriptStarted();
         void scriptPaused();
@@ -92,6 +92,7 @@ namespace mg {
 
     private:
         void internalExecute();
+        void internalClean();
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H
