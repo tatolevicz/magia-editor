@@ -413,6 +413,10 @@ namespace mg{
         }
     }
 
+    void MagiaEditor::setShouldClearAfterExecution(bool should){
+        _shouldClearAfterExecution = should;
+    }
+
     void MagiaEditor::internalExecute(){
         emit scriptStarted();
         auto length = this->textLength();
@@ -427,15 +431,20 @@ namespace mg{
                 return;
             }
 
-            internalClean();
-
             if(_printCallback)
                 _printCallback("\nScript execution ended!\n");
+
+            if(_shouldClearAfterExecution)
+                internalClean();
 
             MagiaDebugger::state = MagiaDebugger::DebuggerState::Coding;
 
             emit scriptFinished();
         });
+    }
+
+    void MagiaEditor::cleanUp(){
+        internalClean();
     }
 
     void MagiaEditor::internalClean(){
@@ -446,4 +455,5 @@ namespace mg{
     std::shared_ptr<sol::state> MagiaEditor::getLuaState(){
         return _lua;
     }
+
 }

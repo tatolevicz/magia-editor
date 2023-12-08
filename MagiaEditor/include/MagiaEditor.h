@@ -35,7 +35,11 @@ namespace mg {
         void stopExecution();
         void stepExecution();
         void continueExecution();
+        void setShouldClearAfterExecution(bool should);
+        void cleanUp();
+
         std::shared_ptr<sol::state> getLuaState();
+
     signals:
         void scriptStarted();
         void scriptPaused();
@@ -80,6 +84,7 @@ namespace mg {
 
         void showVariableValueIfAny(int pos);
 
+
         std::shared_ptr<sol::state> _lua{nullptr};
 
         QTimer *_syntaxTimer{nullptr};
@@ -93,6 +98,8 @@ namespace mg {
     private:
         void internalExecute();
         void internalClean();
+
+        bool _shouldClearAfterExecution = false;
     };
 }
 #endif //TESTSCINTILLACMAKE_MAGIAEDITOR_H

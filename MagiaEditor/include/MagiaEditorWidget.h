@@ -22,6 +22,7 @@ namespace mg {
         MagiaEditorWidget(QWidget* parent = nullptr);
         void resizeEvent(QResizeEvent *event) override;
 
+        MagiaEditor* getEditor();
         QWidget* getCentralWidget();
         std::shared_ptr<sol::state> getLuaState();
 
@@ -34,11 +35,6 @@ namespace mg {
         virtual void onScriptPaused();
         virtual void onScriptFinished();
         virtual void onScriptStarted();
-
-    signals:
-        void scriptStart();
-        void scriptPause();
-        void scriptFinish();
 
     private:
         void updateActions();

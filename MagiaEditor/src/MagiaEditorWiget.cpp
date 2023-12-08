@@ -202,18 +202,14 @@ namespace mg{
 
     void MagiaEditorWidget::onScriptPaused() {
         updateActions();
-        emit scriptPause();
-
     }
 
     void MagiaEditorWidget::onScriptFinished(){
         updateActions();
-        emit scriptFinish();
     }
 
     void MagiaEditorWidget::onScriptStarted() {
         _console->clear();
-        emit scriptStart();
     }
 
     QWidget* MagiaEditorWidget::getCentralWidget(){
@@ -223,4 +219,9 @@ namespace mg{
     std::shared_ptr<sol::state> MagiaEditorWidget::getLuaState(){
         return _editor->getLuaState();
     }
+
+    MagiaEditor* MagiaEditorWidget::getEditor(){
+        return _editor;
+    }
+
 }
